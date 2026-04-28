@@ -18,15 +18,18 @@ constexpr int BOTTOM_PANEL_HEIGHT = TOP_PANEL_HEIGHT;
 
 const auto *colors = &WARMER_SPACE_PALETTE_1;
 float boxRoundness = 0.08;
+constexpr float TEXT_SPACING = 2.0f;
 
 void DrawTextCentered(const char *text, Rectangle rect, int fontSize, Color color) {
-    int textWidth = MeasureText(text, fontSize);
-    int textHeight = fontSize;
+    Font font = GetFontDefault();
+    Vector2 size = MeasureTextEx(font, text, (float)fontSize, TEXT_SPACING);
 
-    int x = rect.x + (rect.width - textWidth) / 2;
-    int y = rect.y + (rect.height - textHeight) / 2;
+    Vector2 position = {
+        rect.x + (rect.width - size.x) / 2,
+        rect.y + (rect.height - size.y) / 2
+    };
 
-    DrawText(text, x, y, fontSize, color);
+    DrawTextEx(font, text, position, (float)fontSize, TEXT_SPACING, color);
 }
 
 void DrawTextCenteredEx(Font font, const char *text, Rectangle rect, float fontSize, float spacing, Color color) {
@@ -139,28 +142,28 @@ int main() {
 
         DrawRectangleRec(cameraFeedRect, {0,0,0,255});
         DrawLine(0, SCENE_HEIGHT, SCENE_WIDTH, SCENE_HEIGHT, colors->screenDividerColor);
-        DrawTextCenteredEx(hudFont, "CAMERA FEED", cameraFeedRect, 50, 2.0f, WHITE);
+        DrawTextCenteredEx(hudFont, "CAMERA FEED", cameraFeedRect, 35, TEXT_SPACING, WHITE);
 
         DrawRectangleRounded(topPanel, 0.08f, 8, colors->panelColor);
         DrawRectangleRoundedLines(topPanel, 0.08f, 8, colors->panelBorderColor);
-        DrawText("ATTITUDE", SCENE_WIDTH + 25, 25, topPanel.y + 10, colors->headerTextColor);
-        DrawText(TextFormat("GX: %.3f", data.gx), SCENE_WIDTH + 25, topPanel.y + 55, 18, colors->textColor);
-        DrawText(TextFormat("GY: %.3f", data.gy), SCENE_WIDTH + 25, topPanel.y + 85, 18, colors->textColor);
-        DrawText(TextFormat("GZ: %.3f", data.gz), SCENE_WIDTH + 25, topPanel.y + 115, 18, colors->textColor);
+        DrawTextEx(hudFont, "ATTITUDE", {(float)SCENE_WIDTH + 25, topPanel.y + 10}, 20, TEXT_SPACING, colors->headerTextColor);
+        DrawTextEx(hudFont, TextFormat("GX: %.3f", data.gx), {(float)SCENE_WIDTH + 25, topPanel.y + 55}, 18, TEXT_SPACING, colors->textColor);
+        DrawTextEx(hudFont, TextFormat("GY: %.3f", data.gy), {(float)SCENE_WIDTH + 25, topPanel.y + 85}, 18, TEXT_SPACING, colors->textColor);
+        DrawTextEx(hudFont, TextFormat("GZ: %.3f", data.gz), {(float)SCENE_WIDTH + 25, topPanel.y + 115}, 18, TEXT_SPACING, colors->textColor);
 
         DrawRectangleRounded(middlePanel, 0.08f, 8, colors->panelColor);
         DrawRectangleRoundedLines(middlePanel, 0.08f, 8, colors->panelBorderColor);
-        DrawText("ALTITUDE / BARO", SCENE_WIDTH + 25, middlePanel.y + 10, 20, colors->headerTextColor);
-        DrawText(TextFormat("Alt: %.2f m", data.altM), SCENE_WIDTH + 25, middlePanel.y + 55, 18, colors->textColor);
-        DrawText(TextFormat("Press: %.2f Pa", data.pressPa), SCENE_WIDTH + 25, middlePanel.y + 85, 18, colors->textColor);
-        DrawText(TextFormat("Temp: %.2f C", data.baroTempC), SCENE_WIDTH + 25, middlePanel.y + 115, 18, colors->textColor);
+        DrawTextEx(hudFont, "ALTITUDE / BARO", {(float)SCENE_WIDTH + 25, middlePanel.y + 10}, 20, TEXT_SPACING, colors->headerTextColor);
+        DrawTextEx(hudFont, TextFormat("Alt: %.2f m", data.altM), {(float)SCENE_WIDTH + 25, middlePanel.y + 55}, 18, TEXT_SPACING, colors->textColor);
+        DrawTextEx(hudFont, TextFormat("Press: %.2f Pa", data.pressPa), {(float)SCENE_WIDTH + 25, middlePanel.y + 85}, 18, TEXT_SPACING, colors->textColor);
+        DrawTextEx(hudFont, TextFormat("Temp: %.2f C", data.baroTempC), {(float)SCENE_WIDTH + 25, middlePanel.y + 115}, 18, TEXT_SPACING, colors->textColor);
 
         DrawRectangleRounded(bottomPanel, 0.08f, 8, colors->panelColor);
         DrawRectangleRoundedLines(bottomPanel, 0.08f, 8, colors->panelBorderColor);
-        DrawText("FLIGHT STATE", SCENE_WIDTH + 25, bottomPanel.y + 10, 20, colors->headerTextColor);
-        DrawText(TextFormat("Time: %.2f s", data.t_us / 1000000.0f), SCENE_WIDTH + 25, bottomPanel.y + 55, 18, colors->textColor);
-        DrawText("Stage: DATA PLAYBACK", SCENE_WIDTH + 25, bottomPanel.y + 85, 18, colors->textColor);
-        DrawText(TextFormat("Sample dt: %lld us", dt), SCENE_WIDTH + 25, bottomPanel.y + 115, 18, colors->textColor);
+        DrawTextEx(hudFont, "FLIGHT STATE", {(float)SCENE_WIDTH + 25, bottomPanel.y + 10}, 20, TEXT_SPACING, colors->headerTextColor);
+        DrawTextEx(hudFont, TextFormat("Time: %.2f s", data.t_us / 1000000.0f), {(float)SCENE_WIDTH + 25, bottomPanel.y + 55}, 18, TEXT_SPACING, colors->textColor);
+        DrawTextEx(hudFont, "Stage: DATA PLAYBACK", {(float)SCENE_WIDTH + 25, bottomPanel.y + 85}, 18, TEXT_SPACING, colors->textColor);
+        DrawTextEx(hudFont, TextFormat("Sample dt: %lld us", dt), {(float)SCENE_WIDTH + 25, bottomPanel.y + 115}, 18, TEXT_SPACING, colors->textColor);
 
 
         EndDrawing();
