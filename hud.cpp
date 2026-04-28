@@ -29,6 +29,16 @@ void DrawTextCentered(const char *text, Rectangle rect, int fontSize, Color colo
     DrawText(text, x, y, fontSize, color);
 }
 
+void DrawTextCenteredEx(Font font, const char *text, Rectangle rect, float fontSize, float spacing, Color color) {
+    Vector2 size = MeasureTextEx(font, text, fontSize, spacing);
+    Vector2 position = {
+        rect.x + (rect.width - size.x) / 2,
+        rect.y + (rect.height - size.y) / 2
+    };
+
+    DrawTextEx(font, text, position, fontSize, spacing, color);
+}
+
 int main() {
 
     SetConfigFlags(FLAG_MSAA_4X_HINT);
@@ -129,7 +139,7 @@ int main() {
 
         DrawRectangleRec(cameraFeedRect, {0,0,0,255});
         DrawLine(0, SCENE_HEIGHT, SCENE_WIDTH, SCENE_HEIGHT, colors->screenDividerColor);
-        DrawTextCentered("CAMERA FEED", cameraFeedRect, 50, WHITE);
+        DrawTextCenteredEx(hudFont, "CAMERA FEED", cameraFeedRect, 50, 2.0f, WHITE);
 
         DrawRectangleRounded(topPanel, 0.08f, 8, colors->panelColor);
         DrawRectangleRoundedLines(topPanel, 0.08f, 8, colors->panelBorderColor);
@@ -155,4 +165,5 @@ int main() {
 
         EndDrawing();
     }
+    UnloadFont(hudFont);
 }
