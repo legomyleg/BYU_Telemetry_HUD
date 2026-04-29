@@ -8,11 +8,12 @@
 constexpr int SAMPLE_RATE = 30;
 constexpr int SCREEN_WIDTH = 1200;
 constexpr int SCREEN_HEIGHT = 700;
+constexpr int FULLSCREEN_KEY = KEY_F;
 constexpr int SCENE_WIDTH = SCREEN_WIDTH / 3;
 constexpr int SCENE_HEIGHT = SCREEN_HEIGHT / 2;
 constexpr int SCENE_RENDER_SCALE = 2;
 constexpr int PANEL_WIDTH = SCREEN_WIDTH - SCENE_WIDTH;
-constexpr int TOP_PANEL_HEIGHT = (SCREEN_HEIGHT - 40) / 3;
+constexpr int TOP_PANEL_HEIGHT = (SCREEN_HEIGHT - 40) / 5;
 constexpr int MIDDLE_PANEL_HEIGHT = TOP_PANEL_HEIGHT;
 constexpr int BOTTOM_PANEL_HEIGHT = TOP_PANEL_HEIGHT;
 
@@ -46,6 +47,7 @@ int main() {
 
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Rocket Attitude Visualizer");
+    SetWindowMinSize(SCREEN_WIDTH, SCREEN_HEIGHT);
     SetTargetFPS(SAMPLE_RATE);
     
     Font hudFont = LoadFontEx("resources/fonts/HelveticaNeueRoman.otf", 32, nullptr, 0);
@@ -99,6 +101,17 @@ int main() {
 
     Quaternion q = QuaternionIdentity();
     while (!WindowShouldClose()) {
+        if (IsKeyPressed(FULLSCREEN_KEY)) {
+            int monitor = GetCurrentMonitor();
+
+            if (!IsWindowFullscreen()) {
+                SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
+            } else {
+                SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+            }
+
+            ToggleFullscreen();
+        }
 
         if (!running_data.empty()) {
             data = running_data.consume_row();

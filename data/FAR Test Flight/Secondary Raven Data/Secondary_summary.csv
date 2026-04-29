@@ -1,0 +1,48 @@
+Rocket Name,SnowbirdSec
+Firmware,25a237f 10/12/2025 15:57:13
+Serial number,SN601 SnowbirdSec
+Max Altitude,23263.54 feet
+Max velocity,1955.78 feet/sec
+Pad altitude ASL,1950.74 feet
+Launch date,21-Mar-26
+Launch time,10:52:17.185
+Time to first burnout,3.7 sec
+Time to Apo channel fire,39.1 sec
+Time to gyro overload,73.6 sec
+Time to third channel fire,0.0 sec
+Time to main channel fire,218.0 sec
+Time to fourth channel fire,0.0 sec
+Launch rod angle,1.1 deg
+Tilt angle at burnout,13.2 deg
+Roll rate at burnout,-3.9 deg/sec
+Thrust tilt efficiency,97.94%
+Number of ascent rolls,3.550
+Horiz. velocity at apogee,139.8 feet/sec
+Inertial navigation max alt,27546.7 feet
+Max motor burn acceleration,24.4 Gs
+Peak drag deceleration,4.7 Gs
+Apo channel max accel,7.7 Gs
+Main channel max accel,47.1 Gs
+3rd channel max accel,0.0 Gs
+4th channel max accel,0.0 Gs
+Max landing accel,51.4 Gs
+Drogue descent rate,-182.3 feet/sec
+Main chute deploy altitude,1472.4 feet
+Main chute descent rate,-15.8 feet
+Landing Time,10:57:52.665
+Temperature on pad,100.6 F
+Max Temperature,101.3 F
+Min Temperature,90.00 F
+Battery voltage on pad,10.16 V
+Min Battery voltage,5.18 V
+Battery voltage at landing,10.1 V
+Build date,12-Oct-25
+Build time,15:57:13.000
+Flight number,45
+Direction of 1st motion,0.9995,0.0074,-0.0294
+Gravity direction on pad,0.9999,-0.0031,-0.0124
+Low-G accel pad offset,0.0019,-0.0000,-0.0000
+Hi-G accel pad offset,0.35,0.21,-0.68
+Pad gyro rates (deg/sec),0.32,0.17,0.63
+Pad Hi-G accel,1.35,0.21,-0.69
+Pad Low-G Accel,1.00,-0.00,-0.01
