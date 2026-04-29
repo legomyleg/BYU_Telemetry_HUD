@@ -8,11 +8,18 @@ using std::vector, std::queue;
 
 
 struct GyroSample {
-    long long time_elapsed_us;
     float gx;
     float gy;
     float gz;
 };
+
+struct MagnetometerSample {
+    float mx;
+    float my;
+    float mz;
+};
+
+
 
 struct RotationVector {
     float x;
@@ -56,8 +63,6 @@ struct IMU_Data {
     float hgx;
     float hgy;
     float hgz;
-
-
 };
 
 class DataRows {
@@ -85,4 +90,8 @@ public:
 
 struct FrameData {
     IMU_Data imu_data;
+};
+
+struct TestFrameData : FrameData {
+
 };

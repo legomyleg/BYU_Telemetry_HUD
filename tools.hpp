@@ -16,8 +16,8 @@ using std::string, std::stringstream;
 using std::ifstream, std::getline;
 using std::cerr, std::endl, std::runtime_error;
 
-inline void update_orientation(const GyroSample sample, Quaternion& orientation) {
-    float dt = sample.time_elapsed_us / 1000000.0f;
+inline void update_orientation(const GyroSample sample, const long long dt_us, Quaternion& orientation) {
+    long long dt = dt_us / 1000000.0f;
     float dx = sample.gx * dt;
     float dy = sample.gy * dt;
     float dz = sample.gz * dt;

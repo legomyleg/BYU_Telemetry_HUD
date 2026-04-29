@@ -97,7 +97,7 @@ int main() {
     IMU_Data data = running_data.consume_row();
     auto running_time = data.t_us;
     long long dt;
-    GyroSample gyro_vals = {0, 0.0f, 0.0f, 0.0f};
+    GyroSample gyro_vals = {0.0f, 0.0f, 0.0f};
 
     Quaternion q = QuaternionIdentity();
     while (!WindowShouldClose()) {
@@ -118,9 +118,9 @@ int main() {
             dt = data.t_us - running_time;
             running_time = data.t_us;
 
-            gyro_vals = {dt, data.gx, data.gy, data.gz};
+            gyro_vals = {data.gx, data.gy, data.gz};
 
-            update_orientation(gyro_vals, q);
+            update_orientation(gyro_vals, dt, q);
             rocket.transform = QuaternionToMatrix(q);
         }
 
