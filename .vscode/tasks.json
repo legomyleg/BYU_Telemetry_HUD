@@ -1,32 +1,68 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "Build HUD",
-      "type": "shell",
-      "command": "clang++",
-      "args": [
-        "hud.cpp",
-        "-std=c++17",
-        "-I/opt/homebrew/include",
-        "-L/opt/homebrew/lib",
-        "-o",
-        "hud",
-        "-lraylib",
-        "-framework",
-        "OpenGL",
-        "-framework",
-        "Cocoa",
-        "-framework",
-        "IOKit",
-        "-framework",
-        "CoreVideo"
-      ],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "problemMatcher": ["$gcc"]
-    }
-  ]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build HUD",
+            "type": "shell",
+            "command": "clang++",
+            "args": [
+                "hud.cpp",
+                "hud_draw.cpp",
+                "-std=c++17",
+                "-o",
+                "hud",
+                "-I/opt/homebrew/include",
+                "-L/opt/homebrew/lib",
+                "-lraylib",
+                "-framework",
+                "OpenGL",
+                "-framework",
+                "Cocoa",
+                "-framework",
+                "IOKit",
+                "-framework",
+                "CoreVideo"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Debug HUD",
+            "type": "shell",
+            "command": "clang++",
+            "args": [
+                "hud.cpp",
+                "hud_draw.cpp",
+                "-std=c++17",
+                "-g",
+                "-O0",
+                "-o",
+                "dhud",
+                "-I/opt/homebrew/include",
+                "-L/opt/homebrew/lib",
+                "-lraylib",
+                "-framework",
+                "OpenGL",
+                "-framework",
+                "Cocoa",
+                "-framework",
+                "IOKit",
+                "-framework",
+                "CoreVideo"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        }
+
+    ]
 }

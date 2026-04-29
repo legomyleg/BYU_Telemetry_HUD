@@ -16,10 +16,10 @@ void DrawSceneBox(const HudBox &box,
 
 void DrawCameraFeedBox(Font font, const HudBox &box, const Color dividerColor);
 
-void DrawStagesBox(Font font, const HudBox &box);
+// void DrawStagesBox(Font font, const HudBox &box);
 
-void DrawSensorsBox(Font font, const HudBox &box);
+// void DrawSensorsBox(Font font, const HudBox &box);
 
-void DrawGraphBox(Font font, const HudBox &box);
+// void DrawGraphBox(Font font, const HudBox &box);
 
-void DrawReceivingBox(Font font, const HudBox &box);
+// void DrawReceivingBox(Font font, const HudBox &box);

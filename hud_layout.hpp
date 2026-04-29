@@ -1,7 +1,7 @@
 #pragma once
 #include "raylib.h"
 
-inline constexpr float SCENE_WIDTH_RATIO = 2.0f / 3.0f;
+inline constexpr float SCENE_WIDTH_RATIO = 1.0f / 3.0f;
 inline constexpr float STAGES_HEIGHT_RATIO = 0.25f;
 inline constexpr float SENSORS_HEIGHT_RATIO = 0.5f - STAGES_HEIGHT_RATIO;
 inline constexpr float BOTTOM_PANELS_HEIGHT_RATIO = 1.0f - (SENSORS_HEIGHT_RATIO + STAGES_HEIGHT_RATIO);
