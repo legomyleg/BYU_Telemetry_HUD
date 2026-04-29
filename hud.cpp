@@ -4,11 +4,11 @@
 #include "rlights.h"
 #include "tools.hpp"
 #include "colors.hpp"
+#include "hud_draw.hpp"
 
 constexpr int SAMPLE_RATE = 30;
 constexpr int SCREEN_WIDTH = 1200;
 constexpr int SCREEN_HEIGHT = 700;
-constexpr int FULLSCREEN_KEY = KEY_F;
 constexpr int SCENE_WIDTH = SCREEN_WIDTH / 3;
 constexpr int SCENE_HEIGHT = SCREEN_HEIGHT / 2;
 constexpr int SCENE_RENDER_SCALE = 2;
@@ -19,29 +19,8 @@ constexpr int BOTTOM_PANEL_HEIGHT = TOP_PANEL_HEIGHT;
 
 const auto *colors = &WARMER_SPACE_PALETTE_1;
 float boxRoundness = 0.08;
-constexpr float TEXT_SPACING = 2.0f;
+const float TEXT_SPACING = 2.0f;
 
-void DrawTextCentered(const char *text, Rectangle rect, int fontSize, Color color) {
-    Font font = GetFontDefault();
-    Vector2 size = MeasureTextEx(font, text, (float)fontSize, TEXT_SPACING);
-
-    Vector2 position = {
-        rect.x + (rect.width - size.x) / 2,
-        rect.y + (rect.height - size.y) / 2
-    };
-
-    DrawTextEx(font, text, position, (float)fontSize, TEXT_SPACING, color);
-}
-
-void DrawTextCenteredEx(Font font, const char *text, Rectangle rect, float fontSize, float spacing, Color color) {
-    Vector2 size = MeasureTextEx(font, text, fontSize, spacing);
-    Vector2 position = {
-        rect.x + (rect.width - size.x) / 2,
-        rect.y + (rect.height - size.y) / 2
-    };
-
-    DrawTextEx(font, text, position, fontSize, spacing, color);
-}
 
 int main() {
 
@@ -100,18 +79,9 @@ int main() {
     GyroSample gyro_vals = {0.0f, 0.0f, 0.0f};
 
     Quaternion q = QuaternionIdentity();
+
+    HudLayout layout = MakeHudLayout(SCREEN_WIDTH, SCREEN_HEIGHT);
     while (!WindowShouldClose()) {
-        if (IsKeyPressed(FULLSCREEN_KEY)) {
-            int monitor = GetCurrentMonitor();
-
-            if (!IsWindowFullscreen()) {
-                SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
-            } else {
-                SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-            }
-
-            ToggleFullscreen();
-        }
 
         if (!running_data.empty()) {
             data = running_data.consume_row();
@@ -129,33 +99,13 @@ int main() {
         UpdateLightValues(shader, light);
 
         // --- DRAW ---
-        BeginDrawing();
-        ClearBackground(colors->sceneBackgroundColor); // dark background makes lighting pop
-
-        BeginTextureMode(sceneTarget);
-        ClearBackground(colors->sceneBackgroundColor);
-
-        BeginMode3D(camera);
-        DrawModel(rocket, {0, 0, 0}, 0.3f, WHITE);
-        EndMode3D();
-
-        EndTextureMode();
-
-        DrawTexturePro(
-            sceneTarget.texture,
-            {0, 0, (float)sceneTarget.texture.width, -(float)sceneTarget.texture.height},
-            sceneRect,
-            {0, 0},
-            0.0f,
-            WHITE
-        );
+        DrawSceneBox(layout.scene, sceneTarget, camera, rocket, colors->sceneBackgroundColor);
+        DrawCameraFeedBox(hudFont, layout.cameraFeed, colors->screenDividerColor);
 
         DrawRectangleRec(panelRect, colors->panelBackgroundColor);
         DrawLine(SCENE_WIDTH, 0, SCENE_WIDTH, SCREEN_HEIGHT, colors->screenDividerColor);
 
-        DrawRectangleRec(cameraFeedRect, {0,0,0,255});
-        DrawLine(0, SCENE_HEIGHT, SCENE_WIDTH, SCENE_HEIGHT, colors->screenDividerColor);
-        DrawTextCenteredEx(hudFont, "CAMERA FEED", cameraFeedRect, 35, TEXT_SPACING, WHITE);
+        
 
         DrawRectangleRounded(topPanel, 0.08f, 8, colors->panelColor);
         DrawRectangleRoundedLines(topPanel, 0.08f, 8, colors->panelBorderColor);
