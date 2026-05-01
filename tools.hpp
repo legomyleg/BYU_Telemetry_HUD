@@ -10,17 +10,17 @@
 #include <sstream>
 #include <string>
 #include <fstream>
-using std::stof, std::stoll;
+using std::stof, std::stoull;
+using std::sqrt;
 using std::vector, std::queue;
 using std::string, std::stringstream;
 using std::ifstream, std::getline;
 using std::cerr, std::endl, std::runtime_error;
 
-inline void update_orientation(const GyroSample sample, const long long dt_us, Quaternion& orientation) {
-    long long dt = dt_us / 1000000.0f;
-    float dx = sample.gx * dt;
-    float dy = sample.gy * dt;
-    float dz = sample.gz * dt;
+inline void update_orientation(const SensorData sample, const float dt_s, Quaternion& orientation) {
+    float dx = sample.gx * dt_s;
+    float dy = sample.gy * dt_s;
+    float dz = sample.gz * dt_s;
 
     RotationVector rotation = {dx, dy, dz};
     float theta = rotation.length();
@@ -38,37 +38,56 @@ inline void update_orientation(const GyroSample sample, const long long dt_us, Q
     orientation = QuaternionNormalize(orientation);
 }
 
-inline vector<float IMU_Data::*> float_fields = {
-    &IMU_Data::ax,
-    &IMU_Data::ay,
-    &IMU_Data::az,
-    &IMU_Data::gx,
-    &IMU_Data::gy,
-    &IMU_Data::gz,
-    &IMU_Data::mx,
-    &IMU_Data::my,
-    &IMU_Data::mz,
-    &IMU_Data::imuTempC,
-    &IMU_Data::baroTempC,
-    &IMU_Data::pressPa,
-    &IMU_Data::altM,
-    &IMU_Data::hgx,
-    &IMU_Data::hgy,
-    &IMU_Data::hgz
+inline Velocity calculate_velocity(SensorData &s, float dt_s) {
+    float ax_use, ay_use, az_use;
+
+    float total_accel = sqrt(s.hgx*s.hgx + s.hgy*s.hgy + s.hgz*s.hgz);
+
+    if (total_accel > 100) {
+        ax_use = s.hgx;
+        ay_use = s.hgy;
+        az_use = s.hgz - 9.81;
+    } else {
+        ax_use = s.ax;
+        ay_use = s.ay;
+        az_use = s.az - 9.81;
+    }
+
+    return {ax_use * dt_s, ay_use * dt_s, az_use * dt_s};
+}
+
+inline vector<float SensorData::*> float_fields = {
+    &SensorData::ax,
+    &SensorData::ay,
+    &SensorData::az,
+    &SensorData::gx,
+    &SensorData::gy,
+    &SensorData::gz,
+    &SensorData::mx,
+    &SensorData::my,
+    &SensorData::mz,
+    &SensorData::imuTempC,
+    &SensorData::baroTempC,
+    &SensorData::pressPa,
+    &SensorData::altM,
+    &SensorData::hgx,
+    &SensorData::hgy,
+    &SensorData::hgz
 };
 
-inline IMU_Data parseLine(const string& line) {
-    IMU_Data data;
+inline SensorData parseLine(const string& line) {
+    std::cout << line << std::endl;
+    SensorData data;
 
     stringstream ss(line);
     string dp;
     queue<float> float_points;
-    long long time;
+    uint64_t time;
 
     int i = 0;
     while(getline(ss, dp, ',')) {
         if (i++ == 0) {
-            time = stoll(dp);
+            time = stoull(dp);
         } else {
             float_points.push(stof(dp));
         }
@@ -85,8 +104,8 @@ inline IMU_Data parseLine(const string& line) {
     return data;
 }
 
-inline DataRows get_data(const string& file_path) {
-    DataRows data;
+inline SampleBuffer get_data(const string& file_path) {
+    SampleBuffer data;
     ifstream inFile(file_path);
     string line;
     if (!inFile.is_open()) {

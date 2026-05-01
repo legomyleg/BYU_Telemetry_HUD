@@ -4,7 +4,10 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/opt/homebrew/opt/raylib/include"
+                "/opt/homebrew/opt/raylib/include",
+                "${env:HOME}/Documents/Arduino/libraries/**",
+                "${env:HOME}/Library/Arduino15/packages/esp32/hardware/esp32/**",
+                "${env:HOME}/Library/Arduino15/packages/esp32/tools/**"
             ],
             "defines": [],
             "cStandard": "c17",

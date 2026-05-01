@@ -6,13 +6,6 @@
 using std::sqrt;
 using std::vector, std::queue;
 
-
-struct GyroSample {
-    float gx;
-    float gy;
-    float gz;
-};
-
 struct MagnetometerSample {
     float mx;
     float my;
@@ -45,53 +38,82 @@ struct RotationVector {
     }
 };
 
-struct IMU_Data {
-    long long t_us;
-    float ax;
-    float ay;
-    float az;
-    float gx;
-    float gy;
-    float gz;
-    float mx;
-    float my;
-    float mz;
-    float imuTempC;
-    float baroTempC;
-    float pressPa;
-    float altM;
-    float hgx;
-    float hgy;
-    float hgz;
+struct Velocity {
+    float vx, vy, vz;
 };
 
-class DataRows {
+struct SensorData {
+  uint64_t t_us;
+
+  float ax, ay, az;
+  float gx, gy, gz;
+  float mx, my, mz;
+  float imuTempC;
+
+  float baroTempC;
+  float pressPa;
+  float altM;
+
+  float hgx, hgy, hgz;
+};
+
+class SampleBuffer {
 private:
-    queue<IMU_Data> rows;
+    queue<SensorData> rows;
 
 public:
 
-    IMU_Data consume_row() {
+    SensorData consume_latest() {
         if (rows.empty()) return {};
 
-        auto row = rows.front();
-        rows.pop();
-        return row;
+        SensorData latest;
+        while(!rows.empty()) {
+            latest = rows.front();
+            rows.pop();
+        }
+
+        return latest;
     }
 
-    void push(IMU_Data data) {
+    SensorData consume_oldest() {
+        auto data = rows.front();
+        rows.pop();
+        return data;
+    }
+
+    SensorData latest() const {
+        if (rows.empty()) return {};
+        return rows.back();
+    }
+
+    void reduce_to_latest() {
+        if (rows.empty() || rows.size() == 1) return;
+
+        while (rows.size() > 1) {
+            rows.pop();
+        }
+    }
+
+    void push(SensorData data) {
         rows.push(data);
     }
 
-    bool empty() {
+    bool empty() const {
         return rows.empty();
     }
 };
 
 struct FrameData {
-    IMU_Data imu_data;
+
+    SensorData sensor_data;
 };
 
 struct TestFrameData : FrameData {
 
+};
+
+struct RocketState {
+    Quaternion orientation;
+    Velocity velocity;
+    
 };
