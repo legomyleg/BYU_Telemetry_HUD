@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "colors.hpp"
 
 using std::string;
 
@@ -14,3 +15,4 @@ inline constexpr float TEXT_SPACING = 2.0f;
 inline constexpr float BOX_ROUNDNESS = 0.08f;
 inline constexpr float TEXT_SIZE = 10.0f;
 inline constexpr float HEADER_SIZE = 15.0f;
+inline constexpr ColorPalette COLOR_PALETTE = WARMER_SPACE_PALETTE_1;

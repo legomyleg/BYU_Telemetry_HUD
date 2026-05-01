@@ -1,18 +1,19 @@
 #pragma once
 #include "raylib.h"
 #include "raymath.h"
-#define RLIGHTS_IMPLEMENTATION
 #include "rlights.h"
 #include "hud_layout.hpp"
 #include "types.hpp"
 #include "config.hpp"
 #include "serial.hpp"
+#include "colors.hpp"
 #include <string>
 using std::string;
 
 
 struct HudApp {
     Font hudFont;
+    ColorPalette colors = COLOR_PALETTE;
     Model rocket;
     Shader shader;
     Light light;

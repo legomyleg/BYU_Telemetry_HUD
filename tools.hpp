@@ -23,44 +23,6 @@ using std::string, std::stringstream;
 using std::ifstream, std::getline;
 using std::cerr, std::endl, std::runtime_error;
 
-inline void update_orientation(const SensorData sample, const float dt_s, Quaternion& orientation) {
-    float dx = sample.gx * dt_s;
-    float dy = sample.gy * dt_s;
-    float dz = sample.gz * dt_s;
-
-    RotationVector rotation = {dx, dy, dz};
-    float theta = rotation.length();
-    auto norm = rotation.normalized();
-    float s = std::sin(theta / 2);
-
-    Quaternion q = {
-        norm.x * s,
-        norm.y * s,
-        norm.z * s,
-        cos(theta / 2)
-    };
-
-    orientation = QuaternionMultiply(orientation, q);
-    orientation = QuaternionNormalize(orientation);
-}
-
-inline Vec3 calculate_velocity(SensorData &s, float dt_s) {
-    float ax_use, ay_use, az_use;
-
-    float total_accel = sqrt(s.hgx*s.hgx + s.hgy*s.hgy + s.hgz*s.hgz);
-
-    if (total_accel > 100) {
-        ax_use = s.hgx;
-        ay_use = s.hgy;
-        az_use = s.hgz - 9.81;
-    } else {
-        ax_use = s.ax;
-        ay_use = s.ay;
-        az_use = s.az - 9.81;
-    }
-
-    return {ax_use * dt_s, ay_use * dt_s, az_use * dt_s};
-}
 
 inline vector<float SensorData::*> float_fields = {
     &SensorData::ax,
