@@ -2,6 +2,8 @@
 #include <cmath>
 #include <vector>
 #include <queue>
+#include "raylib.h"
+#include "raymath.h"
 
 using std::sqrt;
 using std::vector, std::queue;
@@ -11,8 +13,6 @@ struct MagnetometerSample {
     float my;
     float mz;
 };
-
-
 
 struct RotationVector {
     float x;
@@ -36,10 +36,6 @@ struct RotationVector {
             z / len
         };
     }
-};
-
-struct Velocity {
-    float vx, vy, vz;
 };
 
 struct SensorData {
@@ -103,17 +99,29 @@ public:
     }
 };
 
-struct FrameData {
-
-    SensorData sensor_data;
+struct Vec3 {
+    float x = 0;
+    float y = 0;
+    float z = 0;
 };
 
-struct TestFrameData : FrameData {
-
+struct EulerAngles {
+    float roll = 0;
+    float pitch = 0;
+    float yaw = 0;
 };
 
 struct RocketState {
-    Quaternion orientation;
-    Velocity velocity;
-    
+    Quaternion orientation = QuaternionIdentity();
+    EulerAngles attitude;
+    float altitude = 0;
+
+    Vec3 acceleration;
+    float total_acceleration = 0;
+    Vec3 velocity;
+    float total_velocity = 0;
+    float vertical_velocity_mps = 0;
+    Vec3 position;
+
+    SensorData latest_sample{};
 };

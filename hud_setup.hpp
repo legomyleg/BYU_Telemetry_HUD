@@ -21,7 +21,7 @@ struct HudApp {
     HudLayout layout;
     SampleBuffer running_data;
     uint64_t last_measured_time;
-    Quaternion orientation;
+    RocketState state;
 
     string serial_buffer;
 
@@ -78,7 +78,7 @@ inline HudApp SetupHudApp() {
 
     app.layout = MakeHudLayout(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    app.orientation = QuaternionIdentity();
+    app.state.orientation = QuaternionIdentity();
     app.last_measured_time = 0;
 
     return app;

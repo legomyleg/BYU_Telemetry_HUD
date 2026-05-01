@@ -10,6 +10,12 @@
 #include <sstream>
 #include <string>
 #include <fstream>
+
+#include <chrono>
+#include <thread>
+using std::this_thread::sleep_for;
+using std::chrono::milliseconds;
+
 using std::stof, std::stoull;
 using std::sqrt;
 using std::vector, std::queue;
@@ -38,7 +44,7 @@ inline void update_orientation(const SensorData sample, const float dt_s, Quater
     orientation = QuaternionNormalize(orientation);
 }
 
-inline Velocity calculate_velocity(SensorData &s, float dt_s) {
+inline Vec3 calculate_velocity(SensorData &s, float dt_s) {
     float ax_use, ay_use, az_use;
 
     float total_accel = sqrt(s.hgx*s.hgx + s.hgy*s.hgy + s.hgz*s.hgz);
@@ -83,19 +89,21 @@ inline SensorData parseLine(const string& line) {
     string dp;
     queue<float> float_points;
     uint64_t time;
+    vector<string> recorded;
 
-    int i = 0;
     while(getline(ss, dp, ',')) {
-        if (i++ == 0) {
-            time = stoull(dp);
-        } else {
-            float_points.push(stof(dp));
-        }
+        recorded.push_back(dp);
+    }
+    if (recorded.size() > 17 || recorded.size() < 17) {
+        throw std::invalid_argument("Line is not the right size.");
     }
 
-    data.t_us = time;
+    data.t_us = stoull(recorded[0]);
+    for (int i = 1; i < 17; i++) {
+        float_points.push(stof(recorded[i]));
+    }
 
-    i = 0;
+    int i = 0;
     while (!float_points.empty()) {
         data.*float_fields[i++] = float_points.front();
         float_points.pop();
@@ -118,4 +126,8 @@ inline SampleBuffer get_data(const string& file_path) {
     }
 
     return data;
+}
+
+inline void wait(int milli) {
+    sleep_for(milliseconds(milli));
 }

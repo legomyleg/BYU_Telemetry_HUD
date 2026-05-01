@@ -4,9 +4,7 @@
 #include "hud_layout.hpp"
 #include "types.hpp"
 #include "colors.hpp"
-
-inline constexpr float TEXT_SPACING = 2.0f;
-inline constexpr float BOX_ROUNDNESS = 0.08f;
+#include "config.hpp"
 
 struct RenderingData {
     RenderTexture2D *sceneTarget = nullptr;
@@ -18,27 +16,31 @@ struct RenderingData {
     sceneTarget(&_sceneTarget), camera(&_camera), rocket(&_rocket) {}
 };
 
-void DrawTextCenteredEx(Font font, const char *text, Rectangle rect, float fontSize, float spacing, Color color);
+void DrawTextCenteredToTop(Font font, const char *text, Rectangle rect, float fontSize, float spacing, const ColorPalette &colors, float margin);
 
-void DrawBackground(const HudBox &box, const Color color);
+void DrawTextCenteredEx(Font font, const char *text, Rectangle rect, float fontSize, float spacing, const ColorPalette &colors);
+
+void DrawFieldsInBox(Font font, Rectangle& box, WrittenText &text, const ColorPalette &colors, float gapSize);
+
+void DrawBackground(const HudBox &box, const ColorPalette &colors);
 
 void DrawSceneBox(const HudBox &box, 
     RenderTexture2D &sceneTarget, 
     const Camera3D &camera, 
     const Model &rocket,
-    const Color backgroundColor
+    const ColorPalette &colors
 );
 
-void DrawCameraFeedBox(Font font, const HudBox &box);
+void DrawCameraFeedBox(Font font, const HudBox &box, const ColorPalette &colors);
 
-void DrawStagesBox(Font font, const HudBox &box, const Color panelColor, const Color panelBorderColor);
+void DrawStagesBox(Font font, const HudBox &box, const ColorPalette &colors);
 
-void DrawSensorsBox(Font font, const HudBox &box, const Color panelColor, const Color panelBorderColor, const SensorData& data);
+void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &colors, const RocketState& state);
 
-void DrawGraphBox(Font font, const HudBox &box, const Color panelColor, const Color panelBorderColor);
+void DrawGraphBox(Font font, const HudBox &box, const ColorPalette &colors);
 
-void DrawReceivingBox(Font font, const HudBox &box, const Color panelColor, const Color panelBorderColor);
+void DrawReceivingBox(Font font, const HudBox &box, const ColorPalette &colors);
 
-void DrawDivider(const float sceneHeight, const float sceneWidth, const float screenHeight, const Color color);
+void DrawDivider(const float sceneHeight, const float sceneWidth, const float screenHeight, const ColorPalette &colors);
 
-void DrawHud(const HudLayout &layout, Font font, const ColorPalette colors, const RenderingData &rendering, const SensorData& data);
+void DrawHud(const HudLayout &layout, Font font, const ColorPalette &colors, const RenderingData &rendering, const SensorData& data);
