@@ -1,5 +1,5 @@
 #pragma once
-#include "types.hpp"
+#include "rocket_state.hpp"
 
 /*
 HOW TO CALIBRATE:
@@ -47,4 +47,3 @@ inline Vec3 calibrate_sensor_vector(Vec3 vals) {
 inline SensorData get_calibrated_data() {
 
 }
-

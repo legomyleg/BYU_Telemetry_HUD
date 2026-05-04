@@ -1,9 +1,9 @@
 #include "raylib.h"
 #define RLIGHTS_IMPLEMENTATION
-#include "rlights.h"
-#include "hud_draw.hpp"
-#include "hud_setup.hpp"
-#include "state_update.hpp"
+#include "hud/rlights.h"
+#include "hud/hud_draw.hpp"
+#include "hud/hud_app.hpp"
+#include "state/state_update.hpp"
 
 int main() {
 
