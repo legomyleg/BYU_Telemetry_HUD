@@ -1,0 +1,8 @@
+# ninja log v6
+3	939	1777933756831706072	CMakeFiles/BYU_Telemetry_HUD.dir/src/telemetry/serial.cpp.o	d444a92379b4f71c
+1	983	1777933756830255625	CMakeFiles/BYU_Telemetry_HUD.dir/src/hud/hud_app.cpp.o	c544348cdc27471e
+1	1016	1777933756829916054	CMakeFiles/BYU_Telemetry_HUD.dir/src/main.cpp.o	410f6856a0dd290e
+2	1075	1777933756831217548	CMakeFiles/BYU_Telemetry_HUD.dir/src/state/state_update.cpp.o	1f0d1ceb32c9a92d
+3	1171	1777933756832163098	CMakeFiles/BYU_Telemetry_HUD.dir/src/telemetry/telemetry_parse.cpp.o	73240933090874ce
+1	1248	1777933756830521323	CMakeFiles/BYU_Telemetry_HUD.dir/src/hud/hud_draw.cpp.o	701254d29cf2d38b
+1248	1284	1777933758076971911	BYU_Telemetry_HUD	46508c4cb36a3832

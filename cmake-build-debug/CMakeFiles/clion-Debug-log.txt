@@ -1,0 +1,11 @@
+/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/Applications/CLion.app/Contents/bin/ninja/mac/aarch64/ninja -G Ninja -S /Users/pearsonmorris/Desktop/Projects/BYU_Telemetry_HUD -B /Users/pearsonmorris/Desktop/Projects/BYU_Telemetry_HUD/cmake-build-debug
+-- The CXX compiler identification is AppleClang 21.0.0.21000099
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found raylib: /opt/homebrew/lib/libraylib.dylib
+-- Configuring done (0.7s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/pearsonmorris/Desktop/Projects/BYU_Telemetry_HUD/cmake-build-debug
