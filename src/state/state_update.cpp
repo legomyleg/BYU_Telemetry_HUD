@@ -66,7 +66,7 @@ void update_orientation(const SensorData sample, const float dt_s, Quaternion& o
 }
 
 void UpdateState(HudApp& app, SampleBuffer& samples, SerialPort& serial) {
-    ReadSerialSamples(app, app.running_data, serial);
+    ReadSerialSamples(app, app.runningData, serial);
 
     float dt_s;
     float da_m;
@@ -74,15 +74,15 @@ void UpdateState(HudApp& app, SampleBuffer& samples, SerialPort& serial) {
         SensorData data = samples.consume_oldest();
 
         // Initialize the first sample
-        if (app.last_measured_time == 0) {
+        if (app.lastMeasuredTime == 0) {
             app.state.latest_sample = data;
-            app.last_measured_time = data.t_us;
+            app.lastMeasuredTime = data.t_us;
             app.state.altitude = data.altM;
             continue;
         }
 
-        if (data.t_us > app.last_measured_time) {
-            dt_s = (data.t_us - app.last_measured_time) / 1000000.0f;
+        if (data.t_us > app.lastMeasuredTime) {
+            dt_s = (data.t_us - app.lastMeasuredTime) / 1000000.0f;
             da_m = data.altM - app.state.altitude;
 
             update_orientation(data, dt_s, app.state.orientation);
@@ -91,7 +91,7 @@ void UpdateState(HudApp& app, SampleBuffer& samples, SerialPort& serial) {
         }
         app.state.latest_sample = data;
         app.state.altitude = data.altM;
-        app.last_measured_time = data.t_us;
+        app.lastMeasuredTime = data.t_us;
     }
 
     app.rocket.transform = QuaternionToMatrix(app.state.orientation);

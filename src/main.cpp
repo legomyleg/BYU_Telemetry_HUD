@@ -12,7 +12,7 @@ int main() {
 
     while (!WindowShouldClose()) {
 
-        UpdateState(app, app.running_data, serial);
+        UpdateState(app, app.runningData, serial);
 
         float camPos[3] = {app.camera.position.x, app.camera.position.y, app.camera.position.z};
         SetShaderValue(app.shader, app.shader.locs[SHADER_LOC_VECTOR_VIEW], camPos, SHADER_UNIFORM_VEC3);

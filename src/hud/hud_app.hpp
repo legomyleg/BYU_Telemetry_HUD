@@ -9,8 +9,14 @@
 #include "telemetry/serial.hpp"
 #include "colors.hpp"
 #include <string>
+#include <vector>
+using std::vector;
 using std::string;
 
+struct AltAtT {
+    float alt_m;
+    float time_s;
+};
 
 struct HudApp {
     Font hudFont;
@@ -21,9 +27,10 @@ struct HudApp {
     Camera3D camera;
     RenderTexture2D sceneTarget;
     HudLayout layout;
-    SampleBuffer running_data;
-    uint64_t last_measured_time;
+    SampleBuffer runningData;
+    uint64_t lastMeasuredTime;
     RocketState state;
+    vector<AltAtT> measuredAlts;
 
     string serial_buffer;
 

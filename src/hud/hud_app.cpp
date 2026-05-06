@@ -10,10 +10,13 @@ void HudApp::unload() {
 HudApp SetupHudApp() {
     HudApp app{};
 
-    SetConfigFlags(FLAG_MSAA_4X_HINT);
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Rocket Attitude Visualizer");
-    SetWindowMinSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-    SetTargetFPS(SAMPLE_RATE);
+    SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_FULLSCREEN_MODE);
+    InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), "BYU Telemetry HUD");
+
+    int screenWidth = GetScreenWidth();
+    int screenHeight = GetScreenHeight();
+
+    SetTargetFPS(TARGET_FPS);
 
     app.hudFont = LoadFontEx("resources/fonts/HelveticaNeueRoman.otf", 32, nullptr, 0);
     SetTextureFilter(app.hudFont.texture, TEXTURE_FILTER_BILINEAR);
@@ -46,14 +49,16 @@ HudApp SetupHudApp() {
     app.camera.fovy       = 45.0f;
     app.camera.projection = CAMERA_PERSPECTIVE;
 
-    app.sceneTarget = LoadRenderTexture(SCENE_WIDTH * SCENE_RENDER_SCALE, 
-        SCENE_HEIGHT * SCENE_RENDER_SCALE);
+    int sceneWidth = screenWidth * SCENE_WIDTH_RATIO;
+    int sceneHeight = screenHeight / 2;
+    app.sceneTarget = LoadRenderTexture(sceneWidth * SCENE_RENDER_SCALE,
+        sceneHeight * SCENE_RENDER_SCALE);
     SetTextureFilter(app.sceneTarget.texture, TEXTURE_FILTER_BILINEAR);
 
-    app.layout = MakeHudLayout(SCREEN_WIDTH, SCREEN_HEIGHT);
+    app.layout = MakeHudLayout(screenWidth, screenHeight);
 
     app.state.orientation = QuaternionIdentity();
-    app.last_measured_time = 0;
+    app.lastMeasuredTime = 0;
 
     return app;
 }

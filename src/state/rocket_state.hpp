@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "telemetry/sensor_data.hpp"
+#include "telemetry/rolling_sample_window.hpp"
 
 using std::sqrt;
 
@@ -42,6 +43,16 @@ struct EulerAngles {
     float yaw = 0;
 };
 
+enum class FlightStage {
+    Calibrating,
+    Pad,
+    Boost,
+    Coast,
+    Apogee,
+    Descent,
+    Recovery
+};
+
 struct RocketState {
     Quaternion orientation = QuaternionIdentity();
     EulerAngles attitude;
@@ -53,6 +64,8 @@ struct RocketState {
     float total_velocity = 0;
     float vertical_velocity_mps = 0;
     Vec3 position;
+    FlightStage stage = FlightStage::Calibrating;
 
     SensorData latest_sample{};
+    RollingSampleWindow sampleWindow;
 };

@@ -1,6 +1,7 @@
 #include "hud_draw.hpp"
 #include <string>
 #include <format>
+#include "telemetry/telemetry_config.hpp"
 #include "hud_app.hpp"
 using std::string, std::to_string;
 using std::format;
@@ -9,32 +10,55 @@ string roundedStr(float val) {
     return format("{:.2f}", val);
 }
 
-void DrawTextCenteredEx(Font font, const char *text, Rectangle rect, float fontSize, float spacing, const Color color) {
-    Vector2 size = MeasureTextEx(font, text, fontSize, spacing);
+void DrawTextCenteredEx(Font font, const char *text, Rectangle rect, float fontSize, const Color color) {
+    Vector2 size = MeasureTextEx(font, text, fontSize, TEXT_SPACING);
     Vector2 position = {
         rect.x + (rect.width - size.x) / 2,
         rect.y + (rect.height - size.y) / 2
     };
 
-    DrawTextEx(font, text, position, fontSize, spacing, color);
+    DrawTextEx(font, text, position, fontSize, TEXT_SPACING, color);
 }
 
-void DrawTextCenteredToTop(Font font, const char *text, Rectangle rect, float fontSize, float spacing, const Color color, float margin) {
-    Vector2 textSize = MeasureTextEx(font, text, fontSize, spacing);
+void DrawTextCenteredToTop(Font font, const char *text, Rectangle rect, float fontSize, const Color color, float margin) {
+    Vector2 textSize = MeasureTextEx(font, text, fontSize, TEXT_SPACING);
     Vector2 position = {
         rect.x + (rect.width - textSize.x) / 2,
         rect.y + margin
     };
 
-    DrawTextEx(font, text, position, fontSize, spacing, color);
+    DrawTextEx(font, text, position, fontSize, TEXT_SPACING, color);
+}
+
+void DrawTextCenteredAtY(Font font, const char* text, Rectangle rect, float fontSize, const Color color, float y) {
+    // Y val is absolute, relative to the screen, NOT the rect
+
+    Vector2 textSize = MeasureTextEx(font, text, fontSize, TEXT_SPACING);
+    Vector2 position = {
+            rect.x + (rect.width - textSize.x) / 2,
+            y
+    };
+
+    DrawTextEx(font, text, position, fontSize, TEXT_SPACING, color);
+}
+
+void DrawTextCenteredAtXVertical(Font font, const char* text, Rectangle rect, float fontSize, const Color color, float x) {
+    // X val is relative to screen, NOT rect
+    Vector2 textSize = MeasureTextEx(font, text, fontSize, TEXT_SPACING);
+    Vector2 position = {
+            x,
+            rect.y + (rect.height + textSize.x) / 2
+    };
+
+    DrawTextPro(font, text, position, Vector2{0,0}, -90.0f, fontSize, TEXT_SPACING, color);
 }
 
 void DrawFieldsInBox(Font font, Rectangle& box, WrittenText &text, const ColorPalette &colors, float gapSize) {
-    DrawTextCenteredToTop(font, text.title.c_str(), box, TEXT_SIZE, TEXT_SPACING, colors.headerTextColor, 0);
+    DrawTextCenteredToTop(font, text.title.c_str(), box, TEXT_SIZE, colors.headerTextColor, 0);
 
     Vector2 nextPos = {box.x, box.y + TEXT_SIZE + gapSize};
-    for (int i = 0; i < text.lines.size(); i++) {
-        DrawTextEx(font, text.lines[i].c_str(), nextPos, TEXT_SIZE, TEXT_SPACING, colors.textColor);
+    for (const auto & line : text.lines) {
+        DrawTextEx(font, line.c_str(), nextPos, TEXT_SIZE, TEXT_SPACING, colors.textColor);
         nextPos.y += TEXT_SIZE + gapSize;
     }
 }
@@ -43,11 +67,16 @@ void DrawBackground(const HudBox &box, const ColorPalette &colors) {
     DrawRectangleRec(box.bounds, colors.panelBackgroundColor);
 }
 
+void DrawAltBar(const HudBox &box, float currentAlt) {
+
+}
+
 void DrawSceneBox(const HudBox &box, 
     const RenderTexture2D &sceneTarget,
     const Camera3D &camera, 
     const Model &rocket,
-    const ColorPalette &colors
+    const ColorPalette &colors,
+    float currentAlt
 ) {
     BeginTextureMode(sceneTarget);
     ClearBackground(colors.sceneBackgroundColor);
@@ -66,19 +95,21 @@ void DrawSceneBox(const HudBox &box,
         0.0f,
         WHITE
     );
+
+    DrawAltBar(box, currentAlt);
 }
 
 void DrawCameraFeedBox(Font font, const HudBox &box, const ColorPalette &colors) {
     DrawRectangleRec(box.bounds, {0,0,0,255});
 
-    DrawTextCenteredEx(font, "CAMERA FEED", box.bounds, 35, TEXT_SPACING, colors.headerTextColor);
+    DrawTextCenteredEx(font, "CAMERA FEED", box.bounds, 35, colors.headerTextColor);
 }
 
 void DrawStagesBox(Font font, const HudBox &box, const ColorPalette &colors) {
 
     DrawRectangleRounded(box.bounds, BOX_ROUNDNESS, 8, colors.panelColor);
     DrawRectangleRoundedLines(box.bounds, BOX_ROUNDNESS, 8, colors.panelBorderColor);
-    DrawTextCenteredToTop(font, "STAGE", box.bounds, 15.0f, TEXT_SPACING, colors.headerTextColor, 10);
+    DrawTextCenteredToTop(font, "STAGE", box.bounds, 15.0f, colors.headerTextColor, 10);
 
     // ADD STAGING PARTS HERE
 
@@ -89,7 +120,7 @@ void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &colors, co
 
     DrawRectangleRounded(box.bounds, BOX_ROUNDNESS, 8, colors.panelColor);
     DrawRectangleRoundedLines(box.bounds, BOX_ROUNDNESS, 8, colors.panelBorderColor);
-    DrawTextCenteredToTop(font, "SENSOR DATA", box.bounds, 15.0f, TEXT_SPACING, colors.headerTextColor, margin);
+    DrawTextCenteredToTop(font, "SENSOR DATA", box.bounds, 15.0f, colors.headerTextColor, margin);
 
     float textBoxHeight = box.bounds.height - HEADER_SIZE - (margin * 3);
     float textBoxWidth = (box.bounds.width - (margin * 4)) / 3.0f;
@@ -121,40 +152,73 @@ void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &colors, co
     DrawFieldsInBox(font, altitude, altText, colors, 10.0f);
 }
 
-void DrawGraphBox(Font font, const HudBox &box, const ColorPalette &colors) {
+void DrawGraphBox(Font font, const HudBox &box, const ColorPalette &colors, const vector<AltAtT> &measuredAlts) {
+
+    float margin = TEXT_SIZE + 10.0f;
 
     DrawRectangleRounded(box.bounds, BOX_ROUNDNESS, 8, colors.panelColor);
     DrawRectangleRoundedLines(box.bounds, BOX_ROUNDNESS, 8, colors.panelBorderColor);
-    DrawTextCenteredToTop(font, "GRAPH", box.bounds, 15.0f, TEXT_SPACING, colors.headerTextColor, 10.0f);
+    DrawTextCenteredToTop(font, "GRAPH", box.bounds, 15.0f, colors.headerTextColor, 10.0f);
 
-    // ADD GRAPH HERE
+    Vector2 cornerPoint = {box.bounds.x + margin, box.bounds.y + (box.bounds.height - margin)};
+    Vector2 yAxisEndpoint = {cornerPoint.x, box.bounds.y + margin};
+    Vector2 xAxisEndpoint = {box.bounds.x + (box.bounds.width - margin), cornerPoint.y};
+
+    DrawLine((int)cornerPoint.x, (int)cornerPoint.y, (int)yAxisEndpoint.x, (int)yAxisEndpoint.y, WHITE);
+    DrawLine((int)cornerPoint.x, (int)cornerPoint.y, (int)xAxisEndpoint.x, (int)xAxisEndpoint.y, WHITE);
+    DrawTextCenteredAtY(font, "TIME (10s)", box.bounds, TEXT_SIZE, WHITE, cornerPoint.y + 5.0f);
+    DrawTextCenteredAtXVertical(font, "ALTITUDE (500m)", box.bounds, TEXT_SIZE, WHITE, box.bounds.x + 5.0f);
+
+    int xAxisNotches = EXPECTED_FLIGHT_TIME_S / 10; // 1 notch = 10sec
+    int xAxisNotchGap = (int)(xAxisEndpoint.x - cornerPoint.x) / (xAxisNotches + 1);
+    float pixelsPerSec = 10.0f / (float)xAxisNotchGap;
+    for (int i=1; i <= xAxisNotches; i++) {
+        int xLoc = (int)cornerPoint.x + (i * xAxisNotchGap);
+        DrawLine(xLoc, (int)cornerPoint.y, xLoc, (int)cornerPoint.y - 5, WHITE);
+    }
+
+    int yAxisNotches = EXPECTED_MAX_ALT_M / 500; // 1 notch = 500m
+    int yAxisNotchGap = (int)(cornerPoint.y - yAxisEndpoint.y) / (yAxisNotches + 1);
+    float pixelsPerM = 500.0f / (float)yAxisNotchGap;
+    for (int i=1; i <= yAxisNotches; i++) {
+        int yLoc = (int)cornerPoint.y - (i * yAxisNotchGap);
+        DrawLine((int)cornerPoint.x, yLoc, (int)cornerPoint.x + 5, yLoc, WHITE);
+    }
+
+    for (const auto measuredAlt : measuredAlts) {
+        Vector2 position = {
+                cornerPoint.x + (pixelsPerSec * measuredAlt.time_s),
+                cornerPoint.y - (pixelsPerM * measuredAlt.alt_m)
+        };
+        DrawCircle((float)position.x, (float)position.y, 3.0f, RED);
+    }
 }
 
 void DrawReceivingBox(Font font, const HudBox &box, const ColorPalette &colors) {
 
     DrawRectangleRounded(box.bounds, BOX_ROUNDNESS, 8, colors.panelColor);
     DrawRectangleRoundedLines(box.bounds, BOX_ROUNDNESS, 8, colors.panelBorderColor);
-    DrawTextCenteredToTop(font, "TELEMETRY STATS", box.bounds, 15.0f, TEXT_SPACING, colors.headerTextColor, 10.0f);
+    DrawTextCenteredToTop(font, "TELEMETRY STATS", box.bounds, 15.0f, colors.headerTextColor, 10.0f);
 
     // ADD TELEMETRY STATS HERE
 }
 
 void DrawDivider(const float sceneHeight, const float sceneWidth, const float screenHeight, const ColorPalette &colors) {
-    DrawLine(sceneWidth, 0, sceneWidth, screenHeight, colors.screenDividerColor);
-    DrawLine(0, sceneHeight, sceneWidth, sceneHeight, colors.screenDividerColor);
+    DrawLine((int)sceneWidth, 0, (int)sceneWidth, (int)screenHeight, colors.screenDividerColor);
+    DrawLine(0, (int)sceneHeight, (int)sceneWidth, (int)sceneHeight, colors.screenDividerColor);
 }
 
 void DrawHud(const HudApp &app){
 
     BeginDrawing();
 
-    DrawSceneBox(app.layout.scene, app.sceneTarget, app.camera, app.rocket, app.colors);
+    DrawSceneBox(app.layout.scene, app.sceneTarget, app.camera, app.rocket, app.colors, app.state.altitude);
     DrawCameraFeedBox(app.hudFont, app.layout.cameraFeed, app.colors);
     DrawDivider(app.layout.scene.bounds.height, app.layout.scene.bounds.width, app.layout.screenHeight, app.colors);
     DrawBackground(app.layout.panelBackground, app.colors);
     DrawStagesBox(app.hudFont, app.layout.stages, app.colors);
     DrawSensorsBox(app.hudFont, app.layout.sensors, app.colors, app.state);
-    DrawGraphBox(app.hudFont, app.layout.graph, app.colors);
+    DrawGraphBox(app.hudFont, app.layout.graph, app.colors, app.measuredAlts);
     DrawReceivingBox(app.hudFont, app.layout.receiving, app.colors);
 
     EndDrawing();

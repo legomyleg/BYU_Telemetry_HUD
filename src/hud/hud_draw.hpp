@@ -27,10 +27,6 @@ struct WrittenText {
     vector<string> lines;
 };
 
-void DrawTextCenteredToTop(Font font, const char *text, Rectangle rect, float fontSize, float spacing, const ColorPalette &colors, float margin);
-
-void DrawTextCenteredEx(Font font, const char *text, Rectangle rect, float fontSize, float spacing, const ColorPalette &colors);
-
 void DrawFieldsInBox(Font font, Rectangle& box, WrittenText &text, const ColorPalette &colors, float gapSize);
 
 void DrawBackground(const HudBox &box, const ColorPalette &colors);
@@ -48,7 +44,7 @@ void DrawStagesBox(Font font, const HudBox &box, const ColorPalette &colors);
 
 void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &colors, const RocketState& state);
 
-void DrawGraphBox(Font font, const HudBox &box, const ColorPalette &colors);
+void DrawGraphBox(Font font, const HudBox &box, const ColorPalette &colors, const vector<AltAtT> &measuredAlts);
 
 void DrawReceivingBox(Font font, const HudBox &box, const ColorPalette &colors);
 
