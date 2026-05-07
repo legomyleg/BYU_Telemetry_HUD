@@ -1,7 +1,7 @@
 #include "state_update.hpp"
 #include "telemetry/telemetry_parse.hpp"
 
-void ReadSerialSamples(HudApp& app, SampleBuffer& current_data, SerialPort &serial) {
+void ReadSerialSamples(HudApp &app, SampleBuffer &current_data, SerialPort &serial) {
     app.serial_buffer += serial.read_available();
 
     size_t newline_pos;
@@ -44,7 +44,7 @@ void update_velocity(SensorData &s, float dt_s, Vec3 &velocity) {
     velocity.z = az_use * dt_s;
 }
 
-void update_orientation(const SensorData sample, const float dt_s, Quaternion& orientation) {
+void update_orientation(const SensorData sample, const float dt_s, Quaternion &orientation) {
     float dx = sample.gx * dt_s;
     float dy = sample.gy * dt_s;
     float dz = sample.gz * dt_s;
@@ -65,7 +65,7 @@ void update_orientation(const SensorData sample, const float dt_s, Quaternion& o
     orientation = QuaternionNormalize(orientation);
 }
 
-void UpdateState(HudApp& app, SampleBuffer& samples, SerialPort& serial) {
+void UpdateState(HudApp &app, SampleBuffer &samples, SerialPort &serial) {
     ReadSerialSamples(app, app.runningData, serial);
 
     float dt_s;

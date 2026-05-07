@@ -35,7 +35,8 @@ void DrawSceneBox(const HudBox &box,
     const RenderTexture2D &sceneTarget,
     const Camera3D &camera, 
     const Model &rocket,
-    const ColorPalette &colors
+    const ColorPalette &colors,
+    Font font
 );
 
 void DrawCameraFeedBox(Font font, const HudBox &box, const ColorPalette &colors);

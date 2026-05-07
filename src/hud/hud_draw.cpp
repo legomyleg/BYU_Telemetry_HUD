@@ -3,6 +3,7 @@
 #include <format>
 #include "telemetry/telemetry_config.hpp"
 #include "hud_app.hpp"
+#include "milestones.hpp"
 using std::string, std::to_string;
 using std::format;
 
@@ -67,8 +68,76 @@ void DrawBackground(const HudBox &box, const ColorPalette &colors) {
     DrawRectangleRec(box.bounds, colors.panelBackgroundColor);
 }
 
-void DrawAltBar(const HudBox &box, float currentAlt) {
+struct Bar {
+    Vector2 startPos = {0,0};
+    Vector2 endPos = {0,0};
+    float currentAlt = 0;
+    int halfBarWidth = 5;
 
+    void drawBar() {
+        DrawLine(startPos.x, startPos.y, endPos.x, getYPos(currentAlt), GRAY);
+        DrawLine(startPos.x, getYPos(currentAlt), endPos.x, endPos.y, WHITE);
+
+        DrawLine(startPos.x - halfBarWidth, startPos.y, startPos.x + halfBarWidth, startPos.y, GRAY);
+
+        Color topBarColor = (currentAlt * M2FT) >= 30000.0f ? GRAY : WHITE;
+        DrawLine(endPos.x - halfBarWidth, endPos.y, endPos.x + halfBarWidth, endPos.y, topBarColor);
+    }
+
+    float length() {
+        return startPos.y - endPos.y;
+    }
+
+    float getYPos(float altM) {
+        float pixelsPerM = length() / (ALT_BAR_HEIGHT_FT * FT2M); // Converting to meters
+        return startPos.y - (altM * pixelsPerM);
+    }
+
+    void writeSideTextAt(Font font, string text, float fontSize, float altM) {
+        Vector2 textSize = MeasureTextEx(font, text.c_str(), fontSize, TEXT_SPACING);
+        Vector2 position = {
+                startPos.x - halfBarWidth - 5.0f - textSize.x,
+                getYPos(altM) - (textSize.y / 2.0f)
+        };
+
+        Color color = currentAlt > altM ? GREEN : WHITE;
+        DrawTextEx(font, text.c_str(), position, fontSize, TEXT_SPACING, color);
+    }
+
+    void drawMark(float altM) {
+        Color color = currentAlt > altM ? GRAY : WHITE;
+        float yPos = getYPos(altM);
+        DrawLine(startPos.x - halfBarWidth, yPos, startPos.x + halfBarWidth, yPos, color);
+    }
+
+    void draw(Font font, float fontSize) {
+        drawBar();
+        writeSideTextAt(font, ALT_BAR_TOP_HEIGHT_TEXT, fontSize, (ALT_BAR_HEIGHT_FT * FT2M));
+        for (const auto &ms : MILESTONES) {
+            drawMark(ms.altitude_m);
+            writeSideTextAt(font, ms.name, fontSize, ms.altitude_m);
+        }
+
+        DrawCircle(startPos.x, getYPos(currentAlt), 4, RED);
+    }
+
+};
+
+void DrawAltBar(const HudBox &box, float currentAlt, Font font) {
+    int marginToSide = 15;
+    int marginToTop = 10;
+
+    Bar bar;
+    bar.startPos = {
+            box.bounds.x + box.bounds.width - marginToSide,
+            box.bounds.y + box.bounds.height - marginToTop
+    };
+    bar.endPos = {
+            bar.startPos.x,
+            box.bounds.y + marginToTop
+    };
+    bar.currentAlt = currentAlt;
+    bar.draw(font, TEXT_SIZE);
 }
 
 void DrawSceneBox(const HudBox &box, 
@@ -76,7 +145,8 @@ void DrawSceneBox(const HudBox &box,
     const Camera3D &camera, 
     const Model &rocket,
     const ColorPalette &colors,
-    float currentAlt
+    float currentAlt,
+    Font font
 ) {
     BeginTextureMode(sceneTarget);
     ClearBackground(colors.sceneBackgroundColor);
@@ -96,7 +166,7 @@ void DrawSceneBox(const HudBox &box,
         WHITE
     );
 
-    DrawAltBar(box, currentAlt);
+    DrawAltBar(box, currentAlt, font);
 }
 
 void DrawCameraFeedBox(Font font, const HudBox &box, const ColorPalette &colors) {
@@ -177,7 +247,7 @@ void DrawGraphBox(Font font, const HudBox &box, const ColorPalette &colors, cons
         DrawLine(xLoc, (int)cornerPoint.y, xLoc, (int)cornerPoint.y - 5, WHITE);
     }
 
-    int yAxisNotches = EXPECTED_MAX_ALT_M / 500; // 1 notch = 500m
+    int yAxisNotches = GRAPH_ALT_HEIGHT_M / 500; // 1 notch = 500m
     int yAxisNotchGap = (int)(cornerPoint.y - yAxisEndpoint.y) / (yAxisNotches + 1);
     float pixelsPerM = 500.0f / (float)yAxisNotchGap;
     for (int i=1; i <= yAxisNotches; i++) {
@@ -212,7 +282,7 @@ void DrawHud(const HudApp &app){
 
     BeginDrawing();
 
-    DrawSceneBox(app.layout.scene, app.sceneTarget, app.camera, app.rocket, app.colors, app.state.altitude);
+    DrawSceneBox(app.layout.scene, app.sceneTarget, app.camera, app.rocket, app.colors, app.state.altitude, app.hudFont);
     DrawCameraFeedBox(app.hudFont, app.layout.cameraFeed, app.colors);
     DrawDivider(app.layout.scene.bounds.height, app.layout.scene.bounds.width, app.layout.screenHeight, app.colors);
     DrawBackground(app.layout.panelBackground, app.colors);
