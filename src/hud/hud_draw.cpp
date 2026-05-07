@@ -1,6 +1,7 @@
 #include "hud_draw.hpp"
 #include <string>
 #include <format>
+#include <iterator>
 #include "telemetry/telemetry_config.hpp"
 #include "hud_app.hpp"
 #include "milestones.hpp"
@@ -175,14 +176,49 @@ void DrawCameraFeedBox(Font font, const HudBox &box, const ColorPalette &colors)
     DrawTextCenteredEx(font, "CAMERA FEED", box.bounds, 35, colors.headerTextColor);
 }
 
-void DrawStagesBox(Font font, const HudBox &box, const ColorPalette &colors) {
+void DrawStageIndicator(Vector2 center, float radius, const StageInfo &si, bool active, Font font) {
+    Color color = active ? GREEN : GRAY;
+
+    DrawCircleV(center, radius, color);
+
+    float fontSize = 15.0f;
+    Vector2 textSize = MeasureTextEx(font, si.label, fontSize, TEXT_SPACING);
+    Vector2 textPosition = {
+            center.x - (textSize.x / 2),
+            center.y + (radius + 10.0f)
+    };
+
+    DrawTextEx(font, si.label, textPosition, fontSize, TEXT_SPACING, WHITE);
+}
+
+void DrawStagesBox(Font font, const HudBox &box, const ColorPalette &colors, FlightStage stage) {
+
+    float radius = 30.0f;
 
     DrawRectangleRounded(box.bounds, BOX_ROUNDNESS, 8, colors.panelColor);
     DrawRectangleRoundedLines(box.bounds, BOX_ROUNDNESS, 8, colors.panelBorderColor);
     DrawTextCenteredToTop(font, "STAGE", box.bounds, 15.0f, colors.headerTextColor, 10);
 
-    // ADD STAGING PARTS HERE
+    if (stage == FlightStage::Calibrating) {
+        DrawTextCenteredEx(font, "CALIBRATING", box.bounds, 30.0f, WHITE);
+        return;
+    }
 
+    size_t stageCount = std::size(STAGES);
+    float totalCircleWidth = 2.0f * radius * (float)stageCount;
+    float gap = (box.bounds.width - totalCircleWidth) / ((float)stageCount + 1.0f);
+    float posY = box.bounds.y + (box.bounds.height / 2.0f);
+    for (int i=0; i < stageCount; i++) {
+        int ng = i + 1;
+        int nr = 2*i + 1;
+        float posX = box.bounds.x + ((float)ng*gap + (float)nr*radius);
+
+        Vector2 center = {posX, posY};
+
+        bool active = (stage == STAGES[i].stage);
+
+        DrawStageIndicator(center, radius, STAGES[i], active, font);
+    }
 }
 
 void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &colors, const RocketState& state) {
@@ -271,6 +307,10 @@ void DrawReceivingBox(Font font, const HudBox &box, const ColorPalette &colors) 
     DrawTextCenteredToTop(font, "TELEMETRY STATS", box.bounds, 15.0f, colors.headerTextColor, 10.0f);
 
     // ADD TELEMETRY STATS HERE
+
+    // PACKETS DROPPED
+    // SAMPLES RECEIVED PER SECOND
+    // RUNTIME?
 }
 
 void DrawDivider(const float sceneHeight, const float sceneWidth, const float screenHeight, const ColorPalette &colors) {
@@ -286,7 +326,7 @@ void DrawHud(const HudApp &app){
     DrawCameraFeedBox(app.hudFont, app.layout.cameraFeed, app.colors);
     DrawDivider(app.layout.scene.bounds.height, app.layout.scene.bounds.width, app.layout.screenHeight, app.colors);
     DrawBackground(app.layout.panelBackground, app.colors);
-    DrawStagesBox(app.hudFont, app.layout.stages, app.colors);
+    DrawStagesBox(app.hudFont, app.layout.stages, app.colors, FlightStage::Boost);
     DrawSensorsBox(app.hudFont, app.layout.sensors, app.colors, app.state);
     DrawGraphBox(app.hudFont, app.layout.graph, app.colors, app.measuredAlts);
     DrawReceivingBox(app.hudFont, app.layout.receiving, app.colors);

@@ -4,6 +4,9 @@
 #include "raymath.h"
 #include "telemetry/sensor_data.hpp"
 #include "telemetry/rolling_sample_window.hpp"
+#include "telemetry/telemetry_stats.hpp"
+#include <string>
+using::string;
 
 using std::sqrt;
 
@@ -53,6 +56,20 @@ enum class FlightStage {
     Recovery
 };
 
+struct StageInfo {
+    FlightStage stage;
+    const char* label;
+};
+
+constexpr StageInfo STAGES[] = {
+        {FlightStage::Pad, "Pad"},
+        {FlightStage::Boost, "Boost"},
+        {FlightStage::Coast, "Coast"},
+        {FlightStage::Apogee, "Apogee"},
+        {FlightStage::Descent, "Descent"},
+        {FlightStage::Recovery, "Recovery"}
+};
+
 struct RocketState {
     Quaternion orientation = QuaternionIdentity();
     EulerAngles attitude;
@@ -65,6 +82,7 @@ struct RocketState {
     float vertical_velocity_mps = 0;
     Vec3 position;
     FlightStage stage = FlightStage::Calibrating;
+    TelemetryStats telemetry;
 
     SensorData latest_sample{};
     RollingSampleWindow sampleWindow;
