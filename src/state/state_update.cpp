@@ -65,6 +65,10 @@ void update_orientation(const SensorData sample, const float dt_s, Quaternion &o
     orientation = QuaternionNormalize(orientation);
 }
 
+void update_samples_per_sec(float dt_s, float &samples_per_sec) {
+    samples_per_sec = 1.0f / dt_s;
+}
+
 void UpdateState(HudApp &app, SampleBuffer &samples, SerialPort &serial) {
     ReadSerialSamples(app, app.runningData, serial);
 
@@ -88,6 +92,8 @@ void UpdateState(HudApp &app, SampleBuffer &samples, SerialPort &serial) {
             update_orientation(data, dt_s, app.state.orientation);
             update_velocity(data, dt_s, app.state.velocity);
             update_vertical_velocity(da_m, dt_s, app.state.vertical_velocity_mps);
+            update_samples_per_sec(dt_s, app.telemetry.samples_per_sec);
+
         }
         app.state.latest_sample = data;
         app.state.altitude = data.altM;

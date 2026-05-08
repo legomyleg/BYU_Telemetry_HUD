@@ -3,11 +3,11 @@
 #include <string>
 #include <vector>
 #include "raylib.h"
-#include "hud_layout.hpp"
+#include "hud/hud_layout.hpp"
 #include "state/rocket_state.hpp"
-#include "colors.hpp"
-#include "config.hpp"
-#include "hud_app.hpp"
+#include "hud/colors.hpp"
+#include "hud/config.hpp"
+#include "hud/hud_app.hpp"
 
 using std::string;
 using std::vector;

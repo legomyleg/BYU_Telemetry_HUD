@@ -82,7 +82,6 @@ struct RocketState {
     float vertical_velocity_mps = 0;
     Vec3 position;
     FlightStage stage = FlightStage::Calibrating;
-    TelemetryStats telemetry;
 
     SensorData latest_sample{};
     RollingSampleWindow sampleWindow;

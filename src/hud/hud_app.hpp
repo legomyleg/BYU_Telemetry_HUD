@@ -30,6 +30,7 @@ struct HudApp {
     SampleBuffer runningData;
     uint64_t lastMeasuredTime;
     RocketState state;
+    TelemetryStats telemetry;
     vector<AltAtT> measuredAlts;
 
     string serial_buffer;
