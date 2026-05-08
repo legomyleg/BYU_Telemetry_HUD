@@ -5,7 +5,7 @@
 #include "telemetry/telemetry_config.hpp"
 #include "hud/hud_app.hpp"
 #include "hud/milestones.hpp"
-using std::string, std::to_string;
+using std::string;
 using std::format;
 
 string roundedStr(float val) {
