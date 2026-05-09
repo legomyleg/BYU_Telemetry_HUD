@@ -244,6 +244,10 @@ void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &colors, co
     Rectangle attitude = {box.x + (margin*2) + textBoxWidth, textBoxY, textBoxWidth, textBoxHeight};
     Rectangle altitude = {box.x + margin*3 + textBoxWidth*2, textBoxY, textBoxWidth, textBoxHeight};
 
+    // Ttrying out drawing individual boxes
+    DrawRectangleRoundedLines(velocity,BOX_ROUNDNESS,8.0f, colors.screenDividerColor);
+    // Ending this
+
     string velXyz = "X: " + roundedStr(state.velocity.x) +
             " Y: " + roundedStr(state.velocity.y) +
             " Z: " + roundedStr(state.velocity.z);
