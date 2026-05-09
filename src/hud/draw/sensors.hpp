@@ -1,8 +1,9 @@
 #include "raylib.h"
 #include "hud/hud_app.hpp"
 #include "hud/colors.hpp"
+#include "utils.hpp"
 
-void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &colors, const RocketState& state) {
+inline void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &colors, const RocketState& state) {
     float margin = 15.0f;
 
     DrawRectangleRounded(box, BOX_ROUNDNESS, 8, colors.panelColor);

@@ -1,3 +1,6 @@
+#pragma once
+
+#include "hud/config.hpp"
 #include "raylib.h"
 #include "hud/hud_app.hpp"
 #include "hud/colors.hpp"
@@ -58,11 +61,12 @@ inline void DrawTextCenteredAtXVertical(Font font, const char* text, Rectangle r
 }
 
 inline void DrawFieldsInBox(Font font, Rectangle& box, WrittenText &text, const ColorPalette &colors, float gapSize) {
-    DrawTextCenteredToTop(font, text.title.c_str(), box, TEXT_SIZE, colors.headerTextColor, 0);
+    DrawTextCenteredToTop(font, text.title.c_str(), box, SUBHEADER_TEXT_SIZE, colors.headerTextColor, 0);
 
-    Vector2 nextPos = {box.x, box.y + TEXT_SIZE + gapSize};
+    float centeredX = (box.x + box.width) / 2.0f;
+    Vector2 nextPos = {centeredX, box.y + SUBHEADER_TEXT_SIZE + gapSize};
     for (const auto & line : text.lines) {
-        DrawTextEx(font, line.c_str(), nextPos, TEXT_SIZE, TEXT_SPACING, colors.textColor);
-        nextPos.y += TEXT_SIZE + gapSize;
+        DrawTextCenteredAtY(font, line.c_str(), box, READOUT_TEXT_SIZE, colors.textColor, nextPos.y);
+        nextPos.y += READOUT_TEXT_SIZE + gapSize;
     }
 }
