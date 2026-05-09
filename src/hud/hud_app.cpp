@@ -1,3 +1,4 @@
+#define RLIGHTS_IMPLEMENTATION
 #include "hud_app.hpp"
 
 void HudApp::unload() {

@@ -29,7 +29,6 @@
 *     3. This notice may not be removed or altered from any source distribution.
 *
 **********************************************************************************************/
-#pragma once
 #ifndef RLIGHTS_H
 #define RLIGHTS_H
 

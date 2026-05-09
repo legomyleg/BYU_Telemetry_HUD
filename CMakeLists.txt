@@ -13,12 +13,22 @@ add_executable(BYU_Telemetry_HUD
         src/telemetry/telemetry_parse.cpp
 )
 
+add_executable(test 
+        tests/test.cpp
+        src/hud/draw/hud_draw.cpp
+        src/hud/hud_app.cpp
+)
+
 target_compile_features(BYU_Telemetry_HUD PRIVATE cxx_std_20)
+target_compile_features(test PRIVATE cxx_std_20)
 
 target_include_directories(BYU_Telemetry_HUD PRIVATE
         src
 )
+target_include_directories(test PRIVATE src)
 
 target_link_libraries(BYU_Telemetry_HUD PRIVATE
         raylib
 )
+
+target_link_libraries(test PRIVATE raylib)
