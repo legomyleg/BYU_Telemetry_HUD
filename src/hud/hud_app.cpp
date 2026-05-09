@@ -62,3 +62,9 @@ HudApp SetupHudApp() {
 
     return app;
 }
+
+void UpdateShader(Camera3D camera, Shader shader, Light light) {
+    float camPos[3] = {camera.position.x, camera.position.y, camera.position.z};
+    SetShaderValue(shader, shader.locs[SHADER_LOC_VECTOR_VIEW], camPos, SHADER_UNIFORM_VEC3);
+    UpdateLightValues(shader, light);
+}

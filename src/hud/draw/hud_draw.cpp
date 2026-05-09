@@ -10,6 +10,12 @@
 using std::string;
 using std::format;
 
+
+struct WrittenText {
+    string title;
+    vector<string> lines;
+};
+
 string roundedStr(float val) {
     return format("{:.2f}", val);
 }

@@ -4,9 +4,8 @@
 #include "raymath.h"
 #include "telemetry/sensor_data.hpp"
 #include "telemetry/rolling_sample_window.hpp"
-#include "telemetry/telemetry_stats.hpp"
 #include <string>
-using::string;
+using std::string;
 
 using std::sqrt;
 

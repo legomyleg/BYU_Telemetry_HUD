@@ -1,12 +1,12 @@
 #pragma once
 #include "raylib.h"
-#include "raymath.h"
 #include "rlights.h"
 #include "hud_layout.hpp"
 #include "telemetry/sample_buffer.hpp"
 #include "state/rocket_state.hpp"
 #include "config.hpp"
 #include "telemetry/serial.hpp"
+#include "telemetry/telemetry_stats.hpp"
 #include "colors.hpp"
 #include <string>
 #include <vector>
@@ -39,3 +39,4 @@ struct HudApp {
 };
 
 HudApp SetupHudApp();
+void UpdateShader(Camera3D camera, Shader shader, Light light);
