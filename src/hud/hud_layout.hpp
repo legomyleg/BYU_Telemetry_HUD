@@ -2,9 +2,7 @@
 #include "raylib.h"
 #include "config.hpp"
 
-struct HudBox {
-    Rectangle bounds;
-};
+using HudBox = Rectangle;
 
 struct HudLayout {
     HudBox scene;
@@ -13,7 +11,7 @@ struct HudLayout {
     HudBox stages;
     HudBox sensors;
     HudBox graph;
-    HudBox receiving;
+    HudBox telem;
     float screenHeight;
     float screenWidth;
 };
@@ -34,8 +32,8 @@ inline HudLayout MakeHudLayout(int screenWidth, int screenHeight) {
     layout.screenWidth = screenWidth;
     layout.screenHeight = screenHeight;
 
-    layout.scene.bounds = {0, 0, sceneWidth, sceneHeight};
-    layout.cameraFeed.bounds = {0, sceneHeight, cameraFeedWidth, cameraFeedHeight};
+    layout.scene = {0, 0, sceneWidth, sceneHeight};
+    layout.cameraFeed = {0, sceneHeight, cameraFeedWidth, cameraFeedHeight};
 
 
     const float stagesHeight = screenHeight * STAGES_HEIGHT_RATIO;
@@ -45,11 +43,11 @@ inline HudLayout MakeHudLayout(int screenWidth, int screenHeight) {
     const float receivingWidth = screenWidth - (sceneWidth + graphWidth);
     const float receivingHeight = graphHeight;
 
-    layout.panelBackground.bounds = {sceneWidth, 0, panelsWidth, (float)screenHeight};
-    layout.stages.bounds = {sceneWidth + margin, margin, panelsWidth - doubleMargin, stagesHeight - (margin + halfMargin)};
-    layout.sensors.bounds = {sceneWidth + margin, stagesHeight + halfMargin, panelsWidth - doubleMargin, sensorsHeight - margin};
-    layout.graph.bounds = {sceneWidth + margin, stagesHeight + sensorsHeight + halfMargin, graphWidth - (margin + halfMargin), graphHeight - (margin + halfMargin)};
-    layout.receiving.bounds = {sceneWidth + graphWidth + halfMargin, stagesHeight + sensorsHeight + halfMargin, receivingWidth - (margin + halfMargin), receivingHeight - (margin + halfMargin)};
+    layout.panelBackground = {sceneWidth, 0, panelsWidth, (float)screenHeight};
+    layout.stages = {sceneWidth + margin, margin, panelsWidth - doubleMargin, stagesHeight - (margin + halfMargin)};
+    layout.sensors = {sceneWidth + margin, stagesHeight + halfMargin, panelsWidth - doubleMargin, sensorsHeight - margin};
+    layout.graph = {sceneWidth + margin, stagesHeight + sensorsHeight + halfMargin, graphWidth - (margin + halfMargin), graphHeight - (margin + halfMargin)};
+    layout.telem = {sceneWidth + graphWidth + halfMargin, stagesHeight + sensorsHeight + halfMargin, receivingWidth - (margin + halfMargin), receivingHeight - (margin + halfMargin)};
 
     return layout;
 }

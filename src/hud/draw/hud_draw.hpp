@@ -47,7 +47,7 @@ void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &colors, co
 
 void DrawGraphBox(Font font, const HudBox &box, const ColorPalette &colors, const vector<AltAtT> &measuredAlts);
 
-void DrawReceivingBox(Font font, const HudBox &box, const ColorPalette &colors);
+void DrawTelemetryBox(const HudApp &app);
 
 void DrawDivider(const float sceneHeight, const float sceneWidth, const float screenHeight, const ColorPalette &colors);
 
