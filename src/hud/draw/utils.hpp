@@ -61,10 +61,11 @@ inline void DrawTextCenteredAtXVertical(Font font, const char* text, Rectangle r
 }
 
 inline void DrawFieldsInBox(Font font, Rectangle& box, WrittenText &text, const ColorPalette &colors, float gapSize) {
-    DrawTextCenteredToTop(font, text.title.c_str(), box, SUBHEADER_TEXT_SIZE, colors.headerTextColor, 0);
+    DrawRectangleRoundedLines(box, BOX_ROUNDNESS, 8, colors.screenDividerColor);
+    DrawTextCenteredToTop(font, text.title.c_str(), box, SUBHEADER_TEXT_SIZE, colors.headerTextColor, FB_TITLE_MARGIN_TOP);
 
     float centeredX = (box.x + box.width) / 2.0f;
-    Vector2 nextPos = {centeredX, box.y + SUBHEADER_TEXT_SIZE + gapSize};
+    Vector2 nextPos = {centeredX, box.y + SUBHEADER_TEXT_SIZE + (2.0f*FB_TITLE_MARGIN_BOT)};
     for (const auto & line : text.lines) {
         DrawTextCenteredAtY(font, line.c_str(), box, READOUT_TEXT_SIZE, colors.textColor, nextPos.y);
         nextPos.y += READOUT_TEXT_SIZE + gapSize;

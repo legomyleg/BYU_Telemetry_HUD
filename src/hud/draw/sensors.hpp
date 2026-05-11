@@ -8,19 +8,15 @@ inline void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &col
 
     DrawRectangleRounded(box, BOX_ROUNDNESS, 8, colors.panelColor);
     DrawRectangleRoundedLines(box, BOX_ROUNDNESS, 8, colors.panelBorderColor);
-    DrawTextCenteredToTop(font, "SENSOR DATA", box, 15.0f, colors.headerTextColor, margin);
+    DrawTextCenteredToTop(font, "SENSOR DATA", box, BOX_HEADER_SIZE, colors.headerTextColor, margin);
 
-    float textBoxHeight = box.height - HEADER_SIZE - (margin * 3);
+    float textBoxHeight = box.height - BOX_HEADER_SIZE - (margin * 3);
     float textBoxWidth = (box.width - (margin * 4)) / 3.0f;
-    float textBoxY = box.y + HEADER_SIZE + margin*2;
+    float textBoxY = box.y + BOX_HEADER_SIZE + margin*2;
 
     Rectangle velocity = {box.x + margin, textBoxY, textBoxWidth, textBoxHeight};
     Rectangle attitude = {box.x + (margin*2) + textBoxWidth, textBoxY, textBoxWidth, textBoxHeight};
     Rectangle altitude = {box.x + margin*3 + textBoxWidth*2, textBoxY, textBoxWidth, textBoxHeight};
-
-    // Ttrying out drawing individual boxes
-    DrawRectangleRoundedLines(velocity,BOX_ROUNDNESS,8.0f, colors.screenDividerColor);
-    // Ending this
 
     string velXyz = "X: " + roundedStr(state.velocity.x) +
             " Y: " + roundedStr(state.velocity.y) +
