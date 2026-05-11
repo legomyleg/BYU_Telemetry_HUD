@@ -27,8 +27,8 @@ inline constexpr float FT2M = 0.3048;
 // TEXT SIZES
 
 inline constexpr float ALT_BAR_TEXT_SIZE = 10.0f;
-inline constexpr float BOX_HEADER_SIZE = 20.0f;
-inline constexpr float SUBHEADER_TEXT_SIZE = 10.0f;
+inline constexpr float BOX_HEADER_SIZE = 17.0f;
+inline constexpr float SUBHEADER_TEXT_SIZE = 12.0f;
 inline constexpr float READOUT_TEXT_SIZE = 12.0f;
 inline constexpr float GRAPH_AXIS_TEXT_SIZE = 10.0f;
 inline constexpr float STAGE_INDICATOR_TEXT_SIZE = 15.0f;
@@ -38,5 +38,6 @@ inline constexpr float SCREEN_HIJACK_TEXT_SIZE = 60.0f;
 inline constexpr float GRAPH_POINT_RAD = 3.0f;
 
 // MARGIN SIZES FOR THE FIELD BOXES
-inline constexpr float FB_TITLE_MARGIN_TOP = 5.0f;
-inline constexpr float FB_TITLE_MARGIN_BOT = 10.0f;
+inline constexpr float FB_TITLE_MARGIN_TOP = 15.0f;
+inline constexpr float FB_TITLE_MARGIN_BOT = 15.0f;
+

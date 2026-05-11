@@ -64,10 +64,25 @@ inline void DrawFieldsInBox(Font font, Rectangle& box, WrittenText &text, const 
     DrawRectangleRoundedLines(box, BOX_ROUNDNESS, 8, colors.screenDividerColor);
     DrawTextCenteredToTop(font, text.title.c_str(), box, SUBHEADER_TEXT_SIZE, colors.headerTextColor, FB_TITLE_MARGIN_TOP);
 
+
     float centeredX = (box.x + box.width) / 2.0f;
     Vector2 nextPos = {centeredX, box.y + SUBHEADER_TEXT_SIZE + (2.0f*FB_TITLE_MARGIN_BOT)};
     for (const auto & line : text.lines) {
         DrawTextCenteredAtY(font, line.c_str(), box, READOUT_TEXT_SIZE, colors.textColor, nextPos.y);
         nextPos.y += READOUT_TEXT_SIZE + gapSize;
+    }
+}
+
+
+inline void DrawFieldsInBox(Font font, Rectangle& box, WrittenText &text, const ColorPalette &colors, float sh_size, float ro_size, float gapSize) {
+    DrawRectangleRoundedLines(box, BOX_ROUNDNESS, 8, colors.screenDividerColor);
+    DrawTextCenteredToTop(font, text.title.c_str(), box, sh_size, colors.headerTextColor, FB_TITLE_MARGIN_TOP);
+
+
+    float centeredX = (box.x + box.width) / 2.0f;
+    Vector2 nextPos = {centeredX, box.y + sh_size + (2.0f*FB_TITLE_MARGIN_BOT)};
+    for (const auto & line : text.lines) {
+        DrawTextCenteredAtY(font, line.c_str(), box, ro_size, colors.textColor, nextPos.y);
+        nextPos.y += ro_size + gapSize;
     }
 }
