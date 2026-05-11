@@ -1,6 +1,6 @@
 #include "raylib.h"
-#include "hud/hud_app.hpp"
-#include "hud/colors.hpp"
+#include "../hud_app.hpp"
+#include "../colors.hpp"
 #include "utils.hpp"
 
 inline void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &colors, const RocketState& state) {

@@ -2,11 +2,11 @@
 #include "raylib.h"
 #include "rlights.h"
 #include "hud_layout.hpp"
-#include "telemetry/sample_buffer.hpp"
-#include "state/rocket_state.hpp"
+#include "../telemetry/sample_buffer.hpp"
+#include "../state/rocket_state.hpp"
 #include "config.hpp"
-#include "telemetry/serial.hpp"
-#include "telemetry/telemetry_stats.hpp"
+#include "../telemetry/serial.hpp"
+#include "../telemetry/telemetry_stats.hpp"
 #include "colors.hpp"
 #include <string>
 #include <vector>

@@ -3,10 +3,9 @@
 #include <string>
 #include <iterator>
 #include <termios.h>
-#include "hud/config.hpp"
-#include "telemetry/telemetry_config.hpp"
-#include "hud/hud_app.hpp"
-#include "hud/milestones.hpp"
+#include "../config.hpp"
+#include "../../telemetry/telemetry_config.hpp"
+#include "../milestones.hpp"
 #include "utils.hpp"
 #include "sensors.hpp"
 using std::string;
