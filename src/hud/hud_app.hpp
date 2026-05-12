@@ -8,6 +8,7 @@
 #include "../telemetry/serial.hpp"
 #include "../telemetry/telemetry_stats.hpp"
 #include "colors.hpp"
+#include "state/calibration.hpp"
 #include <string>
 #include <vector>
 using std::vector;
@@ -31,6 +32,7 @@ struct HudApp {
     uint64_t lastMeasuredTime;
     RocketState state;
     TelemetryStats telemetry;
+    Biases biases;
     vector<AltAtT> measuredAlts;
 
     string serial_buffer;

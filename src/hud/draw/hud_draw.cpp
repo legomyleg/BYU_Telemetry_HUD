@@ -1,4 +1,5 @@
 #include "hud_draw.hpp"
+#include "hud/hud_app.hpp"
 #include "raylib.h"
 #include <string>
 #include <iterator>
@@ -6,6 +7,7 @@
 #include "../config.hpp"
 #include "../../telemetry/telemetry_config.hpp"
 #include "../milestones.hpp"
+#include "state/rocket_state.hpp"
 #include "utils.hpp"
 #include "sensors.hpp"
 #include "telem.hpp"
@@ -213,9 +215,23 @@ void DrawDivider(const float sceneHeight, const float sceneWidth, const float sc
     DrawLine(0, (int)sceneHeight, (int)sceneWidth, (int)sceneHeight, colors.screenDividerColor);
 }
 
+void DrawCalibratingScreen(const HudApp &app) {
+    Rectangle screen = {0, 0, app.layout.screenWidth, app.layout.screenHeight};
+    DrawRectangleRec(screen, BLACK);
+
+    string text = std::format("Calibrating...{}%", app.state.sampleWindow.percent_full());
+    float yPos = screen.height / 2.0f;
+    DrawTextCenteredAtY(app.hudFont, text.c_str(), screen, SCREEN_HIJACK_TEXT_SIZE, WHITE, yPos);
+}
+
 void DrawHud(const HudApp &app){
 
     BeginDrawing();
+
+    if (app.state.stage == FlightStage::Calibrating) {
+        DrawCalibratingScreen(app);
+        return;
+    }
 
     DrawSceneBox(app.layout.scene, app.sceneTarget, app.camera, app.rocket, app.colors, app.state.altitude, app.hudFont);
     DrawCameraFeedBox(app.hudFont, app.layout.cameraFeed, app.colors);

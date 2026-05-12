@@ -1,6 +1,11 @@
 #pragma once
 #include "rocket_state.hpp"
 
+struct Biases {
+    Vector3 accel = {0,0,0};
+    Vector3 gyro = {0,0,0};
+};
+
 /*
 HOW TO CALIBRATE:
 
@@ -44,6 +49,3 @@ inline Vec3 calibrate_sensor_vector(Vec3 vals) {
     return {x1, y1, z1};
 }
 
-inline SensorData get_calibrated_data() {
-
-}
