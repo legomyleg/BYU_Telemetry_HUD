@@ -20,7 +20,6 @@ vector<float SensorData::*> float_fields = {
 };
 
 SensorData parseLine(const string& line) {
-    std::cout << line << std::endl;
     SensorData data;
 
     stringstream ss(line);

@@ -226,7 +226,7 @@ void DrawCalibratingScreen(const HudApp &app) {
 
 void DrawHud(const HudApp &app){
 
-    BeginDrawing();
+    // BeginDrawing();
 
     if (app.state.stage == FlightStage::Calibrating) {
         DrawCalibratingScreen(app);
@@ -242,5 +242,5 @@ void DrawHud(const HudApp &app){
     DrawGraphBox(app.hudFont, app.layout.graph, app.colors, app.measuredAlts);
     DrawTelemetryBox(app);
 
-    EndDrawing();
+    // EndDrawing();
 }

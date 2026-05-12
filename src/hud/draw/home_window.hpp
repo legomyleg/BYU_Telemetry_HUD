@@ -2,7 +2,7 @@
 #include "hud/hud_app.hpp"
 #include "raylib.h"
 
-inline Rectangle DrawCalButton(const HudApp &app) {
+inline Rectangle DrawCalibScreen(const HudApp &app) {
     float buttonWidth = 200.0f;
     float buttonHeight = 50.0f;
     float buttonX = (app.layout.screenWidth + buttonWidth) / 2.0f;

@@ -13,9 +13,11 @@ int main() {
     SerialPort serial = SerialPort("/dev/cu.usbserial-0001", 57600);
 
     while (!WindowShouldClose()) {
+        
+        BeginDrawing();
 
         if (!initialized) {
-            Rectangle calib_button = DrawCalButton(app);
+            Rectangle calib_button = DrawCalibScreen(app);
             Vector2 mousePos = GetMousePosition();
             if (CheckCollisionPointRec(mousePos,calib_button) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 initialized = true;
@@ -28,6 +30,8 @@ int main() {
             UpdateShader(app.camera, app.shader, app.light);
         }
         DrawHud(app);
+
+        EndDrawing();
 
     }
 
