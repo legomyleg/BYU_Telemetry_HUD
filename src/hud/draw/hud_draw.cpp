@@ -1,77 +1,17 @@
 #include "hud_draw.hpp"
-#include <raylib.h>
-#include <string>
-#include <format>
-#include <iterator>
-#include "hud/config.hpp"
-#include "telemetry/telemetry_config.hpp"
 #include "hud/hud_app.hpp"
-#include "hud/milestones.hpp"
+#include "raylib.h"
+#include <string>
+#include <iterator>
+#include <termios.h>
+#include "../config.hpp"
+#include "../../telemetry/telemetry_config.hpp"
+#include "../milestones.hpp"
+#include "state/rocket_state.hpp"
+#include "utils.hpp"
+#include "sensors.hpp"
+#include "telem.hpp"
 using std::string;
-using std::format;
-
-
-struct WrittenText {
-    string title;
-    vector<string> lines;
-};
-
-string roundedStr(float val) {
-    return format("{:.2f}", val);
-}
-
-void DrawTextCenteredEx(Font font, const char *text, Rectangle rect, float fontSize, const Color color) {
-    Vector2 size = MeasureTextEx(font, text, fontSize, TEXT_SPACING);
-    Vector2 position = {
-        rect.x + (rect.width - size.x) / 2,
-        rect.y + (rect.height - size.y) / 2
-    };
-
-    DrawTextEx(font, text, position, fontSize, TEXT_SPACING, color);
-}
-
-void DrawTextCenteredToTop(Font font, const char *text, Rectangle rect, float fontSize, const Color color, float margin) {
-    Vector2 textSize = MeasureTextEx(font, text, fontSize, TEXT_SPACING);
-    Vector2 position = {
-        rect.x + (rect.width - textSize.x) / 2,
-        rect.y + margin
-    };
-
-    DrawTextEx(font, text, position, fontSize, TEXT_SPACING, color);
-}
-
-void DrawTextCenteredAtY(Font font, const char* text, Rectangle rect, float fontSize, const Color color, float y) {
-    // Y val is absolute, relative to the screen, NOT the rect
-
-    Vector2 textSize = MeasureTextEx(font, text, fontSize, TEXT_SPACING);
-    Vector2 position = {
-            rect.x + (rect.width - textSize.x) / 2,
-            y
-    };
-
-    DrawTextEx(font, text, position, fontSize, TEXT_SPACING, color);
-}
-
-void DrawTextCenteredAtXVertical(Font font, const char* text, Rectangle rect, float fontSize, const Color color, float x) {
-    // X val is relative to screen, NOT rect
-    Vector2 textSize = MeasureTextEx(font, text, fontSize, TEXT_SPACING);
-    Vector2 position = {
-            x,
-            rect.y + (rect.height + textSize.x) / 2
-    };
-
-    DrawTextPro(font, text, position, Vector2{0,0}, -90.0f, fontSize, TEXT_SPACING, color);
-}
-
-void DrawFieldsInBox(Font font, Rectangle& box, WrittenText &text, const ColorPalette &colors, float gapSize) {
-    DrawTextCenteredToTop(font, text.title.c_str(), box, TEXT_SIZE, colors.headerTextColor, 0);
-
-    Vector2 nextPos = {box.x, box.y + TEXT_SIZE + gapSize};
-    for (const auto & line : text.lines) {
-        DrawTextEx(font, line.c_str(), nextPos, TEXT_SIZE, TEXT_SPACING, colors.textColor);
-        nextPos.y += TEXT_SIZE + gapSize;
-    }
-}
 
 void DrawBackground(const HudBox &box, const ColorPalette &colors) {
     DrawRectangleRec(box, colors.panelBackgroundColor);
@@ -102,15 +42,15 @@ struct Bar {
         return startPos.y - (altM * pixelsPerM);
     }
 
-    void writeSideTextAt(Font font, string text, float fontSize, float altM) {
-        Vector2 textSize = MeasureTextEx(font, text.c_str(), fontSize, TEXT_SPACING);
+    void writeSideTextAt(Font font, string text, float size, float altM) {
+        Vector2 textSize = MeasureTextEx(font, text.c_str(), size, TEXT_SPACING);
         Vector2 position = {
                 startPos.x - halfBarWidth - 5.0f - textSize.x,
                 getYPos(altM) - (textSize.y / 2.0f)
         };
 
         Color color = currentAlt > altM ? GREEN : WHITE;
-        DrawTextEx(font, text.c_str(), position, fontSize, TEXT_SPACING, color);
+        DrawTextEx(font, text.c_str(), position, size, TEXT_SPACING, color);
     }
 
     void drawMark(float altM) {
@@ -119,12 +59,12 @@ struct Bar {
         DrawLine(startPos.x - halfBarWidth, yPos, startPos.x + halfBarWidth, yPos, color);
     }
 
-    void draw(Font font, float fontSize) {
+    void draw(Font font, float barTextSize) {
         drawBar();
-        writeSideTextAt(font, ALT_BAR_TOP_HEIGHT_TEXT, fontSize, (ALT_BAR_HEIGHT_FT * FT2M));
+        writeSideTextAt(font, ALT_BAR_TOP_HEIGHT_TEXT, barTextSize, (ALT_BAR_HEIGHT_FT * FT2M));
         for (const auto &ms : MILESTONES) {
             drawMark(ms.altitude_m);
-            writeSideTextAt(font, ms.name, fontSize, ms.altitude_m);
+            writeSideTextAt(font, ms.name, barTextSize, ms.altitude_m);
         }
 
         DrawCircle(startPos.x, getYPos(currentAlt), 4, RED);
@@ -146,7 +86,7 @@ void DrawAltBar(const HudBox &box, float currentAlt, Font font) {
             box.y + marginToTop
     };
     bar.currentAlt = currentAlt;
-    bar.draw(font, TEXT_SIZE);
+    bar.draw(font, ALT_BAR_TEXT_SIZE);
 }
 
 void DrawSceneBox(const HudBox &box, 
@@ -181,7 +121,7 @@ void DrawSceneBox(const HudBox &box,
 void DrawCameraFeedBox(Font font, const HudBox &box, const ColorPalette &colors) {
     DrawRectangleRec(box, {0,0,0,255});
 
-    DrawTextCenteredEx(font, "CAMERA FEED", box, 35, colors.headerTextColor);
+    DrawTextCenteredEx(font, "CAMERA FEED", box, SCREEN_HIJACK_TEXT_SIZE, colors.headerTextColor);
 }
 
 void DrawStageIndicator(Vector2 center, float radius, const StageInfo &si, bool active, Font font) {
@@ -189,14 +129,13 @@ void DrawStageIndicator(Vector2 center, float radius, const StageInfo &si, bool 
 
     DrawCircleV(center, radius, color);
 
-    float fontSize = 15.0f;
-    Vector2 textSize = MeasureTextEx(font, si.label, fontSize, TEXT_SPACING);
+    Vector2 textSize = MeasureTextEx(font, si.label, STAGE_INDICATOR_TEXT_SIZE, TEXT_SPACING);
     Vector2 textPosition = {
             center.x - (textSize.x / 2),
             center.y + (radius + 10.0f)
     };
 
-    DrawTextEx(font, si.label, textPosition, fontSize, TEXT_SPACING, WHITE);
+    DrawTextEx(font, si.label, textPosition, STAGE_INDICATOR_TEXT_SIZE, TEXT_SPACING, WHITE);
 }
 
 void DrawStagesBox(Font font, const HudBox &box, const ColorPalette &colors, FlightStage stage) {
@@ -205,10 +144,10 @@ void DrawStagesBox(Font font, const HudBox &box, const ColorPalette &colors, Fli
 
     DrawRectangleRounded(box, BOX_ROUNDNESS, 8, colors.panelColor);
     DrawRectangleRoundedLines(box, BOX_ROUNDNESS, 8, colors.panelBorderColor);
-    DrawTextCenteredToTop(font, "STAGE", box, 15.0f, colors.headerTextColor, 10);
+    DrawTextCenteredToTop(font, "STAGE", box, BOX_HEADER_SIZE, colors.headerTextColor, 10);
 
     if (stage == FlightStage::Calibrating) {
-        DrawTextCenteredEx(font, "CALIBRATING", box, 30.0f, WHITE);
+        DrawTextCenteredEx(font, "CALIBRATING", box, SCREEN_HIJACK_TEXT_SIZE, WHITE);
         return;
     }
 
@@ -229,50 +168,13 @@ void DrawStagesBox(Font font, const HudBox &box, const ColorPalette &colors, Fli
     }
 }
 
-void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &colors, const RocketState& state) {
-    float margin = 15.0f;
-
-    DrawRectangleRounded(box, BOX_ROUNDNESS, 8, colors.panelColor);
-    DrawRectangleRoundedLines(box, BOX_ROUNDNESS, 8, colors.panelBorderColor);
-    DrawTextCenteredToTop(font, "SENSOR DATA", box, 15.0f, colors.headerTextColor, margin);
-
-    float textBoxHeight = box.height - HEADER_SIZE - (margin * 3);
-    float textBoxWidth = (box.width - (margin * 4)) / 3.0f;
-    float textBoxY = box.y + HEADER_SIZE + margin*2;
-
-    Rectangle velocity = {box.x + margin, textBoxY, textBoxWidth, textBoxHeight};
-    Rectangle attitude = {box.x + (margin*2) + textBoxWidth, textBoxY, textBoxWidth, textBoxHeight};
-    Rectangle altitude = {box.x + margin*3 + textBoxWidth*2, textBoxY, textBoxWidth, textBoxHeight};
-
-    string velXyz = "X: " + roundedStr(state.velocity.x) +
-            " Y: " + roundedStr(state.velocity.y) +
-            " Z: " + roundedStr(state.velocity.z);
-    string totalVel = "Total Velocity: " + roundedStr(state.total_velocity) + "m/s";
-    string vertVel = "Vertical Velocity: " + roundedStr(state.vertical_velocity_mps) + "m/s";
-    vector<string> vDataVals = {velXyz, totalVel, vertVel};
-    WrittenText velText = {"VELOCITY", vDataVals};
-
-    string attRoll = "Roll: " + roundedStr(state.attitude.roll);
-    string attPitch = "Pitch: " + roundedStr(state.attitude.pitch);
-    string attYaw = "Yaw: " + roundedStr(state.attitude.yaw);
-    vector<string> attDataVals = {attRoll, attPitch, attYaw};
-    WrittenText attText = {"ATTITUDE", attDataVals};
-
-    string altVal = "Altitude: " + roundedStr(state.altitude);
-    WrittenText altText = {"ALTITUDE", {altVal}};
-
-    DrawFieldsInBox(font, velocity, velText, colors, 10.0f);
-    DrawFieldsInBox(font, attitude, attText, colors, 10.0f);
-    DrawFieldsInBox(font, altitude, altText, colors, 10.0f);
-}
-
 void DrawGraphBox(Font font, const HudBox &box, const ColorPalette &colors, const vector<AltAtT> &measuredAlts) {
 
-    float margin = TEXT_SIZE + 10.0f;
+    float margin = GRAPH_AXIS_TEXT_SIZE + 10.0f;
 
     DrawRectangleRounded(box, BOX_ROUNDNESS, 8, colors.panelColor);
     DrawRectangleRoundedLines(box, BOX_ROUNDNESS, 8, colors.panelBorderColor);
-    DrawTextCenteredToTop(font, "GRAPH", box, 15.0f, colors.headerTextColor, 10.0f);
+    DrawTextCenteredToTop(font, "GRAPH", box, BOX_HEADER_SIZE, colors.headerTextColor, 10.0f);
 
     Vector2 cornerPoint = {box.x + margin, box.y + (box.height - margin)};
     Vector2 yAxisEndpoint = {cornerPoint.x, box.y + margin};
@@ -280,8 +182,8 @@ void DrawGraphBox(Font font, const HudBox &box, const ColorPalette &colors, cons
 
     DrawLine((int)cornerPoint.x, (int)cornerPoint.y, (int)yAxisEndpoint.x, (int)yAxisEndpoint.y, WHITE);
     DrawLine((int)cornerPoint.x, (int)cornerPoint.y, (int)xAxisEndpoint.x, (int)xAxisEndpoint.y, WHITE);
-    DrawTextCenteredAtY(font, "TIME (10s)", box, TEXT_SIZE, WHITE, cornerPoint.y + 5.0f);
-    DrawTextCenteredAtXVertical(font, "ALTITUDE (500m)", box, TEXT_SIZE, WHITE, box.x + 5.0f);
+    DrawTextCenteredAtY(font, "TIME (10s)", box, GRAPH_AXIS_TEXT_SIZE, WHITE, cornerPoint.y + 5.0f);
+    DrawTextCenteredAtXVertical(font, "ALTITUDE (500m)", box, GRAPH_AXIS_TEXT_SIZE, WHITE, box.x + 5.0f);
 
     int xAxisNotches = EXPECTED_FLIGHT_TIME_S / 10; // 1 notch = 10sec
     int xAxisNotchGap = (int)(xAxisEndpoint.x - cornerPoint.x) / (xAxisNotches + 1);
@@ -304,53 +206,8 @@ void DrawGraphBox(Font font, const HudBox &box, const ColorPalette &colors, cons
                 cornerPoint.x + (pixelsPerSec * measuredAlt.time_s),
                 cornerPoint.y - (pixelsPerM * measuredAlt.alt_m)
         };
-        DrawCircleV(position, 3.0f, RED);
+        DrawCircleV(position, GRAPH_POINT_RAD, RED);
     }
-}
-
-void DrawTelemetryBox(const HudApp &app) {
-
-    HudBox box = app.layout.telem;
-    float margin = 10.0f;
-    
-    DrawRectangleRounded(box, BOX_ROUNDNESS, 8, app.colors.panelColor);
-    DrawRectangleRoundedLines(box, BOX_ROUNDNESS, 8, app.colors.panelBorderColor);
-    DrawTextCenteredToTop(app.hudFont, "TELEMETRY STATS", box, HEADER_SIZE, app.colors.headerTextColor, margin);
-
-    // ADD TELEMETRY STATS HERE
-
-    // Create info boxes
-    float titleHeight = margin + HEADER_SIZE;
-    float remHeight = box.height - titleHeight;
-    float textBoxHeight = (box.height - (margin * 4.0f)) / 3.0f;
-    float textBoxWidth = box.width - (margin * 2.0f);
-    float xVal = box.x + margin;
-
-    float spsY = box.y + titleHeight + margin;
-    Rectangle spsBox = {xVal, spsY, textBoxWidth, textBoxHeight};
-
-    float pdY = spsY + textBoxHeight + margin;
-    Rectangle pdBox = {xVal, pdY, textBoxWidth, textBoxHeight};
-
-    float ukY = pdY + textBoxHeight + margin;
-    Rectangle ukBox = {xVal, ukY, textBoxWidth, textBoxHeight};
-
-    // SAMPLES RECEIVED PER SECOND
-    float sps = app.telemetry.samples_per_sec;
-    WrittenText spsText = {"SAMPLES PER SECOND", {roundedStr(sps)}};
-
-    // PACKETS DROPPED
-    float pd = app.telemetry.packets_dropped;
-    WrittenText pdText = {"PACKETS DROPPED", {roundedStr(pd)}};
-
-    float uk = 0;
-    WrittenText ukText = {"TBD Value", {roundedStr(uk)}};
-
-    DrawFieldsInBox(app.hudFont, spsBox, spsText, app.colors, 10.0f);
-    DrawFieldsInBox(app.hudFont, pdBox, pdText, app.colors, 10.0f);
-    DrawFieldsInBox(app.hudFont, ukBox, ukText, app.colors, 10.0f);
-    
-    // RUNTIME?
 }
 
 void DrawDivider(const float sceneHeight, const float sceneWidth, const float screenHeight, const ColorPalette &colors) {
@@ -358,9 +215,23 @@ void DrawDivider(const float sceneHeight, const float sceneWidth, const float sc
     DrawLine(0, (int)sceneHeight, (int)sceneWidth, (int)sceneHeight, colors.screenDividerColor);
 }
 
+void DrawCalibratingScreen(const HudApp &app) {
+    Rectangle screen = {0, 0, app.layout.screenWidth, app.layout.screenHeight};
+    DrawRectangleRec(screen, BLACK);
+
+    string text = std::format("Calibrating...{}%", app.state.sampleWindow.percent_full());
+    float yPos = screen.height / 2.0f;
+    DrawTextCenteredAtY(app.hudFont, text.c_str(), screen, SCREEN_HIJACK_TEXT_SIZE, WHITE, yPos);
+}
+
 void DrawHud(const HudApp &app){
 
     BeginDrawing();
+
+    if (app.state.stage == FlightStage::Calibrating) {
+        DrawCalibratingScreen(app);
+        return;
+    }
 
     DrawSceneBox(app.layout.scene, app.sceneTarget, app.camera, app.rocket, app.colors, app.state.altitude, app.hudFont);
     DrawCameraFeedBox(app.hudFont, app.layout.cameraFeed, app.colors);

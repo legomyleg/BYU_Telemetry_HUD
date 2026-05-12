@@ -11,12 +11,14 @@ add_executable(BYU_Telemetry_HUD
         src/state/state_update.cpp
         src/telemetry/serial.cpp
         src/telemetry/telemetry_parse.cpp
+        src/hud/draw/telem.cpp
 )
 
 add_executable(test 
         tests/test.cpp
         src/hud/draw/hud_draw.cpp
         src/hud/hud_app.cpp
+        src/hud/draw/telem.cpp
 )
 
 target_compile_features(BYU_Telemetry_HUD PRIVATE cxx_std_20)

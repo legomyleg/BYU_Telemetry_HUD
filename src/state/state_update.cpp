@@ -1,7 +1,11 @@
 #include "state_update.hpp"
+#include "state/calibration.hpp"
+#include "state/rocket_state.hpp"
+#include "telemetry/rolling_sample_window.hpp"
 #include "telemetry/telemetry_parse.hpp"
+#include <cassert>
 
-void ReadSerialSamples(HudApp &app, SampleBuffer &current_data, SerialPort &serial) {
+void ReadSerialSamples(HudApp &app, SerialPort &serial) {
     app.serial_buffer += serial.read_available();
 
     size_t newline_pos;
@@ -12,7 +16,8 @@ void ReadSerialSamples(HudApp &app, SampleBuffer &current_data, SerialPort &seri
         if (!line.empty()) {
             try {
                 SensorData sample = parseLine(line);
-                current_data.push(sample);
+                app.runningData.push(sample);
+                app.state.sampleWindow.add_sample(sample);
             } catch (...) {
                 continue;
             }
@@ -70,7 +75,21 @@ void update_samples_per_sec(float dt_s, float &samples_per_sec) {
 }
 
 void UpdateState(HudApp &app, SampleBuffer &samples, SerialPort &serial) {
-    ReadSerialSamples(app, app.runningData, serial);
+
+    ReadSerialSamples(app, serial);
+
+    if (!app.state.sampleWindow.full()) {
+        assert(app.state.stage == FlightStage::Calibrating);
+
+        return;
+    } else if (app.state.stage == FlightStage::Calibrating) {
+
+        // Calibrating the biases
+        app.biases.accel = app.state.sampleWindow.avg_accel();
+        app.biases.gyro = app.state.sampleWindow.avg_gyro();
+
+        app.state.stage = FlightStage::Pad;
+    }
 
     float dt_s;
     float da_m;

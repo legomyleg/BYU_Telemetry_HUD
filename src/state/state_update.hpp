@@ -5,7 +5,7 @@
 #include "telemetry/sensor_data.hpp"
 #include "rocket_state.hpp"
 
-void ReadSerialSamples(HudApp& app, SampleBuffer& current_data, SerialPort &serial);
+void ReadSerialSamples(HudApp& app, SerialPort &serial);
 
 void update_vertical_velocity(float da, float dt_s, float &vert_velocity);
 
