@@ -22,6 +22,7 @@ int main() {
             if (CheckCollisionPointRec(mousePos,calib_button) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 initialized = true;
             }
+            EndDrawing();
             continue;
         }
 

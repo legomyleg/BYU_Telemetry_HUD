@@ -8,6 +8,8 @@
 #include <string>
 using std::format, std::string;
 
+inline constexpr float OPTICAL_OFFSET = 2.0f;
+
 struct WrittenText {
     string title;
     vector<string> lines;
@@ -21,7 +23,7 @@ inline void DrawTextCenteredEx(Font font, const char *text, Rectangle rect, floa
     Vector2 size = MeasureTextEx(font, text, fontSize, TEXT_SPACING);
     Vector2 position = {
         rect.x + (rect.width - size.x) / 2,
-        rect.y + (rect.height - size.y) / 2
+        rect.y + (rect.height - size.y) / 2 + OPTICAL_OFFSET
     };
 
     DrawTextEx(font, text, position, fontSize, TEXT_SPACING, color);
@@ -43,7 +45,7 @@ inline void DrawTextCenteredAtY(Font font, const char* text, Rectangle rect, flo
     Vector2 textSize = MeasureTextEx(font, text, fontSize, TEXT_SPACING);
     Vector2 position = {
             rect.x + (rect.width - textSize.x) / 2,
-            y
+            y - (fontSize / 2.0f)
     };
 
     DrawTextEx(font, text, position, fontSize, TEXT_SPACING, color);

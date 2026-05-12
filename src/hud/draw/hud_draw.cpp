@@ -221,7 +221,7 @@ void DrawCalibratingScreen(const HudApp &app) {
 
     string text = std::format("Calibrating...{}%", app.state.sampleWindow.percent_full());
     float yPos = screen.height / 2.0f;
-    DrawTextCenteredAtY(app.hudFont, text.c_str(), screen, SCREEN_HIJACK_TEXT_SIZE, WHITE, yPos);
+    DrawTextCenteredAtY(app.hudFont, text.c_str(), screen, 30.0f, WHITE, yPos);
 }
 
 void DrawHud(const HudApp &app){
@@ -237,7 +237,7 @@ void DrawHud(const HudApp &app){
     DrawCameraFeedBox(app.hudFont, app.layout.cameraFeed, app.colors);
     DrawDivider(app.layout.scene.height, app.layout.scene.width, app.layout.screenHeight, app.colors);
     DrawBackground(app.layout.panelBackground, app.colors);
-    DrawStagesBox(app.hudFont, app.layout.stages, app.colors, FlightStage::Boost);
+    DrawStagesBox(app.hudFont, app.layout.stages, app.colors, app.state.stage);
     DrawSensorsBox(app.hudFont, app.layout.sensors, app.colors, app.state);
     DrawGraphBox(app.hudFont, app.layout.graph, app.colors, app.measuredAlts);
     DrawTelemetryBox(app);
