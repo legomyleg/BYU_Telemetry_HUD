@@ -3,5 +3,12 @@
 .vscode/*
 .idea/*
 /cmake-build-debug
-/cmake-build-debug
-/cmake-build-debug
+
+# Build folders
+/build
+
+.cache/
+.ccls-cache/
+.idea/
+.vscode/
+.DS_Store
