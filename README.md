@@ -139,11 +139,3 @@ Altitude milestones shown on the altitude ladder are defined in
 - Packet-drop and altitude-graph display support exists in the HUD, but the
   current main loop does not yet populate all of those values.
 - The app expects the serial device to be available at startup.
-
-## Verified
-
-The project currently builds successfully with:
-
-```sh
-cmake --build build
-```
