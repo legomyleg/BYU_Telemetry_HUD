@@ -1,4 +1,4 @@
-/Users/pearsonmorris/Desktop/Projects/BYU_Telemetry_HUD/cmake-build-debug/CMakeFiles/BYU_Telemetry_HUD.dir
-/Users/pearsonmorris/Desktop/Projects/BYU_Telemetry_HUD/cmake-build-debug/CMakeFiles/test.dir
-/Users/pearsonmorris/Desktop/Projects/BYU_Telemetry_HUD/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/pearsonmorris/Desktop/Projects/BYU_Telemetry_HUD/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/pearsonmorris/Developer/BYU_Telemetry_HUD/cmake-build-debug/CMakeFiles/BYU_Telemetry_HUD.dir
+/Users/pearsonmorris/Developer/BYU_Telemetry_HUD/cmake-build-debug/CMakeFiles/test.dir
+/Users/pearsonmorris/Developer/BYU_Telemetry_HUD/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/pearsonmorris/Developer/BYU_Telemetry_HUD/cmake-build-debug/CMakeFiles/rebuild_cache.dir

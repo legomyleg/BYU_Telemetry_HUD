@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include "hud/hud_app.hpp"
+#include "state/rocket_state.hpp"
 #include "state/state_update.hpp"
 #include "hud/draw/hud_draw.hpp"
 
@@ -11,7 +12,9 @@ int main() {
     while (!WindowShouldClose()) {
 
         UpdateState(app, app.runningData, serial);
-        UpdateShader(app.camera, app.shader, app.light);
+        if (app.state.stage != FlightStage::Calibrating) {
+            UpdateShader(app.camera, app.shader, app.light);
+        }
         DrawHud(app);
 
     }
