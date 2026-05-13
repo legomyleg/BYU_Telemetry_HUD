@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 
 project(BYU_Telemetry_HUD VERSION 1.0 LANGUAGES CXX)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 find_package(raylib CONFIG REQUIRED)
 
 add_executable(BYU_Telemetry_HUD

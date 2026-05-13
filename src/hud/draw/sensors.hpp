@@ -32,8 +32,9 @@ inline void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &col
     vector<string> attDataVals = {attRoll, attPitch, attYaw};
     WrittenText attText = {"ATTITUDE", attDataVals};
 
-    string altVal = "Altitude: " + roundedStr(state.altitude);
-    WrittenText altText = {"ALTITUDE", {altVal}};
+    string altASL = "Altitude ASL: " + roundedStr(state.altitude);
+    string altAGL = "Altitude AGL: " + roundedStr(state.altAGL());
+    WrittenText altText = {"ALTITUDE", {altASL, altAGL}};
 
     DrawFieldsInBox(font, velocity, velText, colors, 10.0f);
     DrawFieldsInBox(font, attitude, attText, colors, 10.0f);

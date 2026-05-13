@@ -72,7 +72,7 @@ struct Bar {
 
 };
 
-void DrawAltBar(const HudBox &box, float currentAlt, Font font) {
+void DrawAltBar(const HudBox &box, float currentAltAGL, Font font) {
     int marginToSide = 15;
     int marginToTop = 10;
 
@@ -85,7 +85,7 @@ void DrawAltBar(const HudBox &box, float currentAlt, Font font) {
             bar.startPos.x,
             box.y + marginToTop
     };
-    bar.currentAlt = currentAlt;
+    bar.currentAlt = currentAltAGL;
     bar.draw(font, ALT_BAR_TEXT_SIZE);
 }
 
@@ -94,7 +94,7 @@ void DrawSceneBox(const HudBox &box,
     const Camera3D &camera, 
     const Model &rocket,
     const ColorPalette &colors,
-    float currentAlt,
+    float currentAltAGL,
     Font font
 ) {
     BeginTextureMode(sceneTarget);
@@ -115,7 +115,7 @@ void DrawSceneBox(const HudBox &box,
         WHITE
     );
 
-    DrawAltBar(box, currentAlt, font);
+    DrawAltBar(box, currentAltAGL, font);
 }
 
 void DrawCameraFeedBox(Font font, const HudBox &box, const ColorPalette &colors) {
@@ -233,7 +233,7 @@ void DrawHud(const HudApp &app){
         return;
     }
 
-    DrawSceneBox(app.layout.scene, app.sceneTarget, app.camera, app.rocket, app.colors, app.state.altitude, app.hudFont);
+    DrawSceneBox(app.layout.scene, app.sceneTarget, app.camera, app.rocket, app.colors, app.state.altAGL(), app.hudFont);
     DrawCameraFeedBox(app.hudFont, app.layout.cameraFeed, app.colors);
     DrawDivider(app.layout.scene.height, app.layout.scene.width, app.layout.screenHeight, app.colors);
     DrawBackground(app.layout.panelBackground, app.colors);

@@ -73,6 +73,7 @@ struct RocketState {
     Quaternion orientation = QuaternionIdentity();
     EulerAngles attitude;
     float altitude = 0;
+    float ground_altitude = 0;
 
     Vec3 acceleration;
     float total_acceleration = 0;
@@ -84,4 +85,8 @@ struct RocketState {
 
     SensorData latest_sample{};
     RollingSampleWindow sampleWindow;
+
+    float altAGL() const {
+        return altitude - ground_altitude;
+    }
 };

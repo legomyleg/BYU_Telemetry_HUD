@@ -80,13 +80,13 @@ void UpdateState(HudApp &app, SampleBuffer &samples, SerialPort &serial) {
 
     if (!app.state.sampleWindow.full()) {
         assert(app.state.stage == FlightStage::Calibrating);
-
         return;
     } else if (app.state.stage == FlightStage::Calibrating) {
 
         // Calibrating the biases
         app.biases.accel = app.state.sampleWindow.avg_accel();
         app.biases.gyro = app.state.sampleWindow.avg_gyro();
+        app.state.ground_altitude = app.state.sampleWindow.avg_alt_m();
 
         app.state.stage = FlightStage::Pad;
     }
