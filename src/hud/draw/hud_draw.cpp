@@ -74,7 +74,7 @@ struct Bar {
 
 void DrawAltBar(const HudBox &box, float currentAltAGL, Font font) {
     int marginToSide = 15;
-    int marginToTop = 10;
+    int marginToTop = 20;
 
     Bar bar;
     bar.startPos = {

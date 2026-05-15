@@ -1,11 +1,19 @@
 #define RLIGHTS_IMPLEMENTATION
 #include "hud_app.hpp"
+#include <raymath.h>
 
 void HudApp::unload() {
     UnloadFont(hudFont);
     UnloadModel(rocket);
     UnloadShader(shader);
     UnloadRenderTexture(sceneTarget);
+}
+
+void orient_model(HudApp &app) {
+    auto rot = MatrixRotateZ(PI / 2.0f);
+
+    app.state.orientation = QuaternionFromMatrix(rot);
+    app.rocket.transform = rot;   
 }
 
 HudApp SetupHudApp() {
@@ -59,6 +67,7 @@ HudApp SetupHudApp() {
     app.layout = MakeHudLayout(screenWidth, screenHeight);
 
     app.state.orientation = QuaternionIdentity();
+    orient_model(app);
     app.lastMeasuredTime = 0;
 
     return app;

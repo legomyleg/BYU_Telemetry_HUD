@@ -12,7 +12,9 @@ private:
     microseconds _interval;
     ifstream _file;
 
-    steady_clock::time_point last_read_time;
+    bool has_read;
+
+    steady_clock::time_point first_read;
     steady_clock::time_point accumulated_time;
 
     int num_lines();

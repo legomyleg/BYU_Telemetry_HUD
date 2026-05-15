@@ -80,7 +80,6 @@ void UpdateState(HudApp &app, SampleBuffer &samples, TelemetrySource &tsrc) {
     ReadSamples(app, tsrc);
 
     if (!app.state.sampleWindow.full()) {
-        assert(app.state.stage == FlightStage::Calibrating);
         return;
     } else if (app.state.stage == FlightStage::Calibrating) {
 

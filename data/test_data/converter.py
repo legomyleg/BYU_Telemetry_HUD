@@ -79,10 +79,6 @@ def convert_dicts(hr: dict, lr: dict) -> OutData:
         RuntimeError("Faulty data passed in. Check convert_dicts()")
 
 
-def parse_highrate_line(line: str):
-    pass
-
-
 def equal_time(hr: dict, lr: dict) -> bool:
     try:
         hr_time = hr["Flight_Time_(s)"]

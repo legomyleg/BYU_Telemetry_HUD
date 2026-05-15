@@ -37,9 +37,11 @@ Rocket's frame  [ 0,  0, -1 ] [ y ]     =     [-z ]
 
 */
 
-inline constexpr float R1[3] = {-1, 0, 0};
-inline constexpr float R2[3] = {0, 1, 0};
-inline constexpr float R3[3] = {-1, 0, 0};
+// DO NOT CHANGE TRANSFORMATION MATRIX
+inline constexpr float R1[3] = {0, 0, 1};
+inline constexpr float R2[3] = {0, -1, 0};
+inline constexpr float R3[3] = {1, 0, 0};
+// DO NOT CHANGE TRANSFORMATION MATRIX
 
 inline Vec3 calibrate_sensor_vector(Vec3 vals) {
     float x1 = vals.x*R1[0] + vals.y*R1[1] + vals.z*R1[2];

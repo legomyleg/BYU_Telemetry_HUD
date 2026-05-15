@@ -4,14 +4,19 @@
 #include "../state/state_update.hpp"
 #include <raylib.h>
 #include "draw/home_window.hpp"
+#include "state/rocket_state.hpp"
 
-void RunHud(TelemetrySource *data_src) {
+void RunHud(TelemetrySource *data_src, bool no_calibrate) {
     bool initialized = false;
 
     auto app = SetupHudApp();
 
     while (!WindowShouldClose()) {
         BeginDrawing();
+
+        if (no_calibrate) {
+            app.state.stage = FlightStage::Pad;
+        }
         
         if (data_src != nullptr) {
             if (!initialized) {

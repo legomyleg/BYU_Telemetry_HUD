@@ -7,11 +7,12 @@ using std::chrono::microseconds, std::chrono::steady_clock;
 using std::chrono::duration_cast;
 
 CsvTelemSource::CsvTelemSource(int interval_us, string filePath)
-    : _interval(interval_us), _file(filePath), last_read_time(steady_clock::now()), accumulated_time(steady_clock::now())
+    : _interval(interval_us), _file(filePath), accumulated_time(steady_clock::now())
 {
     if (!_file.is_open()) {
         std::cerr << "Error: could not open file at \"" + filePath + "\"" << std::endl;
     }
+    has_read = false;
 }
 
 int CsvTelemSource::num_lines() {
@@ -23,6 +24,12 @@ int CsvTelemSource::num_lines() {
 }
 
 string CsvTelemSource::read_available() {
+
+    if (!has_read) {
+        accumulated_time = steady_clock::now();
+        has_read = true;
+    }
+
     int nlines = num_lines();
     string lines;
 
