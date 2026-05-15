@@ -4,6 +4,8 @@
 #include <fstream>
 #include <string>
 using std::string, std::ifstream;
+using std::chrono::microseconds, std::chrono::steady_clock;
+using std::chrono::duration_cast;
 
 class CsvTelemSource : public TelemetrySource {
 private:
@@ -12,6 +14,8 @@ private:
 
     std::chrono::steady_clock::time_point last_read_time;
     std::chrono::microseconds accumulated_time;
+
+    int num_lines();
 
 public:
     CsvTelemSource(int sampleRate, string filePath);
