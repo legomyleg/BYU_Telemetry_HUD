@@ -1,5 +1,6 @@
 #pragma once
 
+#include "telemetry/telem_source.hpp"
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
@@ -16,7 +17,7 @@ using std::string;
 using std::cout;
 using std::runtime_error;
 
-class SerialPort {
+class SerialPort : public TelemetrySource {
 private:
     int fd = -1;
 
@@ -25,5 +26,5 @@ public:
 
     ~SerialPort();
 
-    string read_available();
+    string read_available() override;
 };
