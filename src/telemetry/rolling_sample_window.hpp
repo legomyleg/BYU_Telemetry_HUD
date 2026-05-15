@@ -2,7 +2,7 @@
 #include "sensor_data.hpp"
 #include "raylib.h"
 #ifndef WINDOW_SIZE
-#define WINDOW_SIZE 120
+#define WINDOW_SIZE 60
 #endif
 
 class RollingSampleWindow {
