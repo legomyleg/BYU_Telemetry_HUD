@@ -24,4 +24,14 @@ int CsvTelemSource::num_lines() {
 
 string CsvTelemSource::read_available() {
     int nlines = num_lines();
+    string lines;
+
+    int lines_read = 0;
+    string temp_str;
+
+    while (lines_read++ < nlines && getline(_file, temp_str)) {
+        lines.append(temp_str).append("\n");
+    }
+
+    return lines;
 }
