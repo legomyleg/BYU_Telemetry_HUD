@@ -3,23 +3,25 @@
 #include <string>
 #include <chrono>
 using std::getline, std::string;
+using std::chrono::microseconds, std::chrono::steady_clock;
+using std::chrono::duration_cast;
 
-CsvTelemSource::CsvTelemSource(int sampleRate, string filePath)
-    : _sampleRate(sampleRate), _file(filePath), last_read_time(steady_clock::now()) 
+CsvTelemSource::CsvTelemSource(int interval_us, string filePath)
+    : _interval(interval_us), _file(filePath), last_read_time(steady_clock::now()), accumulated_time(steady_clock::now())
 {
     if (!_file.is_open()) {
         std::cerr << "Error: could not open file at \"" + filePath + "\"" << std::endl;
     }
-
-
 }
 
 int CsvTelemSource::num_lines() {
-    auto elapsed = steady_clock::now() - last_read_time;
+    auto elapsed = steady_clock::now() - accumulated_time;
     microseconds delta = duration_cast<microseconds>(elapsed);
-
+    int num_lines = static_cast<int>(delta / _interval);
+    accumulated_time += (_interval * num_lines);
+    return num_lines;
 }
 
 string CsvTelemSource::read_available() {
-    
+    int nlines = num_lines();
 }

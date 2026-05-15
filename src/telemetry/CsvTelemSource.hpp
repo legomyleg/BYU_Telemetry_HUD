@@ -9,16 +9,16 @@ using std::chrono::duration_cast;
 
 class CsvTelemSource : public TelemetrySource {
 private:
-    int _sampleRate;
+    microseconds _interval;
     ifstream _file;
 
-    std::chrono::steady_clock::time_point last_read_time;
-    std::chrono::microseconds accumulated_time;
+    steady_clock::time_point last_read_time;
+    steady_clock::time_point accumulated_time;
 
     int num_lines();
 
 public:
-    CsvTelemSource(int sampleRate, string filePath);
+    CsvTelemSource(int interval_us, string filePath);
     string read_available() override;
     ~CsvTelemSource();
 };
