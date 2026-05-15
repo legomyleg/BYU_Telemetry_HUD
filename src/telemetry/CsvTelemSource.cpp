@@ -35,3 +35,5 @@ string CsvTelemSource::read_available() {
 
     return lines;
 }
+
+CsvTelemSource::~CsvTelemSource() = default;

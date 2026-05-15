@@ -35,7 +35,7 @@ struct HudApp {
     Biases biases;
     vector<AltAtT> measuredAlts;
 
-    string serial_buffer;
+    string data_buffer;
 
     void unload();
 };

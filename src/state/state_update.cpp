@@ -2,16 +2,17 @@
 #include "state/calibration.hpp"
 #include "state/rocket_state.hpp"
 #include "telemetry/rolling_sample_window.hpp"
+#include "telemetry/telem_source.hpp"
 #include "telemetry/telemetry_parse.hpp"
 #include <cassert>
 
-void ReadSerialSamples(HudApp &app, SerialPort &serial) {
-    app.serial_buffer += serial.read_available();
+void ReadSamples(HudApp &app, TelemetrySource &tsrc) {
+    app.data_buffer += tsrc.read_available();
 
     size_t newline_pos;
-    while((newline_pos = app.serial_buffer.find("\n")) != string::npos) {
-        string line = app.serial_buffer.substr(0, newline_pos);
-        app.serial_buffer.erase(0, newline_pos + 1);
+    while((newline_pos = app.data_buffer.find("\n")) != string::npos) {
+        string line = app.data_buffer.substr(0, newline_pos);
+        app.data_buffer.erase(0, newline_pos + 1);
 
         if (!line.empty()) {
             try {
@@ -74,9 +75,9 @@ void update_samples_per_sec(float dt_s, float &samples_per_sec) {
     samples_per_sec = 1.0f / dt_s;
 }
 
-void UpdateState(HudApp &app, SampleBuffer &samples, SerialPort &serial) {
+void UpdateState(HudApp &app, SampleBuffer &samples, TelemetrySource &tsrc) {
 
-    ReadSerialSamples(app, serial);
+    ReadSamples(app, tsrc);
 
     if (!app.state.sampleWindow.full()) {
         assert(app.state.stage == FlightStage::Calibrating);

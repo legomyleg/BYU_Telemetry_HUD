@@ -1,17 +1,8 @@
-#include "hud/draw/hud_draw.hpp"
 #include "hud/hud_app.hpp"
-#include "raylib.h"
-
+#include "../src/hud/run_hud.hpp"
 
 int main(){
-    
     auto dummyApp = SetupHudApp();
-
-    while (!WindowShouldClose()) {
-        DrawHud(dummyApp);
-    }
-
-    dummyApp.unload();
-
+    RunHud(nullptr);
     return 0;
 }
