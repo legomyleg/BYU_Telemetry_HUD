@@ -36,7 +36,7 @@ inline constexpr float STAGE_INDICATOR_TEXT_SIZE = 15.0f;
 inline constexpr float SCREEN_HIJACK_TEXT_SIZE = 60.0f;
 
 // OTHER SIZES
-inline constexpr float GRAPH_POINT_RAD = 3.0f;
+inline constexpr float GRAPH_POINT_RAD = 1.0f;
 
 // MARGIN SIZES FOR THE FIELD BOXES
 inline constexpr float FB_TITLE_MARGIN_TOP = 15.0f;

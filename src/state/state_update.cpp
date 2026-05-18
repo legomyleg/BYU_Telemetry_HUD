@@ -6,6 +6,7 @@
 #include "telemetry/telem_source.hpp"
 #include "telemetry/telemetry_parse.hpp"
 #include <cassert>
+#include <iostream>
 
 void ReadSamples(HudApp &app, TelemetrySource &tsrc) {
     app.data_buffer += tsrc.read_available();
@@ -18,7 +19,7 @@ void ReadSamples(HudApp &app, TelemetrySource &tsrc) {
         if (!line.empty()) {
             try {
                 SensorData sample = parseLine(line);
-                app.runningData.push(sample);
+                app.sample_buffer.push(sample);
                 app.state.sampleWindow.add_sample(sample);
             } catch (...) {
                 continue;
@@ -98,15 +99,15 @@ void UpdateState(HudApp &app, SampleBuffer &samples, TelemetrySource &tsrc) {
         SensorData data = samples.consume_oldest();
 
         // Initialize the first sample
-        if (app.lastMeasuredTime == 0) {
+        if (app.last_measured_time == 0) {
             app.state.latest_sample = data;
-            app.lastMeasuredTime = data.t_us;
+            app.last_measured_time = data.t_us;
             app.state.altitude = data.altM;
             continue;
         }
 
-        if (data.t_us > app.lastMeasuredTime) {
-            dt_s = (data.t_us - app.lastMeasuredTime) / 1000000.0f;
+        if (data.t_us > app.last_measured_time) {
+            dt_s = (data.t_us - app.last_measured_time) / 1000000.0f;
             da_m = data.altM - app.state.altitude;
 
             update_orientation(data, dt_s, app.state.orientation, app.biases);
@@ -117,8 +118,8 @@ void UpdateState(HudApp &app, SampleBuffer &samples, TelemetrySource &tsrc) {
         }
         app.state.latest_sample = data;
         app.state.altitude = data.altM;
-        app.lastMeasuredTime = data.t_us;
-        app.measuredAlts.push_back({app.state.altAGL(), app.lastMeasuredTime/1000000.0f});
+        app.last_measured_time = data.t_us;
+        app.measuredAlts.push_back({app.state.altAGL(), app.last_measured_time/1000000.0f});
     }
 
     app.rocket.transform = QuaternionToMatrix(app.state.orientation);

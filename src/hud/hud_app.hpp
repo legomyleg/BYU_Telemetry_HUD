@@ -28,8 +28,8 @@ struct HudApp {
     Camera3D camera;
     RenderTexture2D sceneTarget;
     HudLayout layout;
-    SampleBuffer runningData;
-    uint64_t lastMeasuredTime;
+    SampleBuffer sample_buffer;
+    uint64_t last_measured_time;
     RocketState state;
     TelemetryStats telemetry;
     Biases biases;

@@ -68,7 +68,7 @@ HudApp SetupHudApp() {
 
     app.state.orientation = QuaternionIdentity();
     orient_model(app);
-    app.lastMeasuredTime = 0;
+    app.last_measured_time = 0;
 
     return app;
 }

@@ -1,6 +1,7 @@
 #include "hud_draw.hpp"
 #include "hud/hud_app.hpp"
 #include "raylib.h"
+#include <iostream>
 #include <string>
 #include <iterator>
 #include <termios.h>
@@ -182,12 +183,12 @@ void DrawGraphBox(Font font, const HudBox &box, const ColorPalette &colors, cons
 
     DrawLine((int)cornerPoint.x, (int)cornerPoint.y, (int)yAxisEndpoint.x, (int)yAxisEndpoint.y, WHITE);
     DrawLine((int)cornerPoint.x, (int)cornerPoint.y, (int)xAxisEndpoint.x, (int)xAxisEndpoint.y, WHITE);
-    DrawTextCenteredAtY(font, "TIME (10s)", box, GRAPH_AXIS_TEXT_SIZE, WHITE, cornerPoint.y + 5.0f);
+    DrawTextCenteredAtY(font, "TIME (10s)", box, GRAPH_AXIS_TEXT_SIZE, WHITE, cornerPoint.y + 10.0f);
     DrawTextCenteredAtXVertical(font, "ALTITUDE (500m)", box, GRAPH_AXIS_TEXT_SIZE, WHITE, box.x + 5.0f);
 
     int xAxisNotches = EXPECTED_FLIGHT_TIME_S / 10; // 1 notch = 10sec
     int xAxisNotchGap = (int)(xAxisEndpoint.x - cornerPoint.x) / (xAxisNotches + 1);
-    float pixelsPerSec = 10.0f / (float)xAxisNotchGap;
+    float pixelsPerSec = (float)xAxisNotchGap / 10.0f;
     for (int i=1; i <= xAxisNotches; i++) {
         int xLoc = (int)cornerPoint.x + (i * xAxisNotchGap);
         DrawLine(xLoc, (int)cornerPoint.y, xLoc, (int)cornerPoint.y - 5, WHITE);
@@ -195,7 +196,7 @@ void DrawGraphBox(Font font, const HudBox &box, const ColorPalette &colors, cons
 
     int yAxisNotches = GRAPH_ALT_HEIGHT_M / 500; // 1 notch = 500m
     int yAxisNotchGap = (int)(cornerPoint.y - yAxisEndpoint.y) / (yAxisNotches + 1);
-    float pixelsPerM = 500.0f / (float)yAxisNotchGap;
+    float pixelsPerM = (float)yAxisNotchGap / 500.0f;
     for (int i=1; i <= yAxisNotches; i++) {
         int yLoc = (int)cornerPoint.y - (i * yAxisNotchGap);
         DrawLine((int)cornerPoint.x, yLoc, (int)cornerPoint.x + 5, yLoc, WHITE);
