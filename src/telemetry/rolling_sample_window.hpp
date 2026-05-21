@@ -44,7 +44,11 @@ public:
 
         if ((_incurred_time + time_increase) > _buffer_duration.count()) {
 
-            _incurred_time -= _window[_next].t_us;
+            int back_i = _next;
+            int one_up = back_i + 1 % _window.size();
+            _incurred_time -= _window[one_up].t_us - _window[back_i].t_us;
+
+            
             _window[_next] = data;
 
             _ilatest = _next;
@@ -117,6 +121,35 @@ public:
 
     Vector3 avg_gyro_all() {
         return avg_gyro(_buffer_duration);
+    }
+
+    float avg_alt_m(const microseconds& duration) {
+        if (duration > _buffer_duration) {
+            return avg_alt_m(_buffer_duration);
+        }
+
+        float sum;
+        int samples_read;
+        int time_count;
+        int start_time = latest().t_us;
+        int i = _ilatest;
+
+        while (time_count < _buffer_duration.count()) {
+            auto data = _window[i];
+
+            sum += data.altM;
+
+            samples_read++;
+            time_count = data.t_us - start_time;
+
+            i = _window.size() + (i - 1) % _window.size();
+        }
+        
+        return sum / samples_read;
+    }
+
+    float avg_alt_m_all() {
+        return avg_alt_m(_buffer_duration);
     }
 
 };
