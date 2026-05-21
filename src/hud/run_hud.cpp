@@ -1,15 +1,16 @@
-#include "run_hud.hpp"
-#include "hud_app.hpp"
-#include "draw/hud_draw.hpp"
-#include "../state/state_update.hpp"
+#include <hud/run_hud.hpp>
+#include <hud/hud_app.hpp>
+#include <hud/draw/hud_draw.hpp>
+#include <state/state_update.hpp>
+#include <chrono>
 #include <raylib.h>
-#include "draw/home_window.hpp"
-#include "state/rocket_state.hpp"
+#include <hud/draw/home_window.hpp>
+#include <state/rocket_state.hpp>
 
-void RunHud(TelemetrySource *data_src, bool no_calibrate) {
+void RunHud(TelemetrySource *data_src, std::chrono::microseconds buffer_size, bool no_calibrate) {
     bool initialized = false;
 
-    auto app = SetupHudApp();
+    auto app = SetupHudApp(buffer_size);
 
     while (!WindowShouldClose()) {
         BeginDrawing();

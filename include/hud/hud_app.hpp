@@ -9,6 +9,7 @@
 #include "../telemetry/telemetry_stats.hpp"
 #include "colors.hpp"
 #include "state/calibration.hpp"
+#include <chrono>
 #include <string>
 #include <vector>
 using std::vector;
@@ -38,7 +39,9 @@ struct HudApp {
     string data_buffer;
 
     void unload();
+
+    HudApp(std::chrono::microseconds buffer_size) : state(buffer_size) {}
 };
 
-HudApp SetupHudApp();
+HudApp SetupHudApp(std::chrono::microseconds buffer_size);
 void UpdateShader(Camera3D camera, Shader shader, Light light);

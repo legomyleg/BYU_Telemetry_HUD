@@ -1,5 +1,5 @@
 #pragma once
-#include "sensor_data.hpp"
+#include <telemetry/sensor_data.hpp>
 #include <raylib.h>
 #include <vector>
 #include <chrono>
@@ -152,7 +152,7 @@ public:
         return avg_alt_m(_buffer_duration);
     }
 
-    int percent_full() {
+    int percent_full() const {
         float p = (float)_buffer_duration.count() / (float)_incurred_time;
         return static_cast<int>(p * 100.0f);
     }

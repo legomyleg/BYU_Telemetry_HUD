@@ -1,17 +1,16 @@
-#include "hud_draw.hpp"
-#include "hud/hud_app.hpp"
-#include "raylib.h"
-#include <iostream>
+#include <hud/draw/hud_draw.hpp>
+#include <hud/hud_app.hpp>
+#include <raylib.h>
 #include <string>
 #include <iterator>
 #include <termios.h>
-#include "../config.hpp"
-#include "../../telemetry/telemetry_config.hpp"
-#include "../milestones.hpp"
-#include "state/rocket_state.hpp"
-#include "utils.hpp"
-#include "sensors.hpp"
-#include "telem.hpp"
+#include <hud/config.hpp>
+#include <telemetry/telemetry_config.hpp>
+#include <hud/milestones.hpp>
+#include <state/rocket_state.hpp>
+#include <hud/draw/utils.hpp>
+#include <hud/draw/sensors.hpp>
+#include <hud/draw/telem.hpp>
 using std::string;
 
 void DrawBackground(const HudBox &box, const ColorPalette &colors) {

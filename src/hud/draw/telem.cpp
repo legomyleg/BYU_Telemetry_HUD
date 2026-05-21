@@ -1,5 +1,5 @@
-#include "telem.hpp"
-#include "utils.hpp"
+#include <hud/draw/telem.hpp>
+#include <hud/draw/utils.hpp>
 
 // TELEM BOX SIZES
 constexpr float TELEM_SUBHEADER_SIZE = 12.0f;

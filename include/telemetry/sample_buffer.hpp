@@ -1,6 +1,6 @@
 #pragma once
 #include <queue>
-#include "sensor_data.hpp"
+#include <telemetry/sensor_data.hpp>
 
 using std::queue;
 

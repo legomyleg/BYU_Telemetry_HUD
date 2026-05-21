@@ -1,9 +1,9 @@
 #pragma once
-#include "hud/hud_app.hpp"
-#include "telemetry/sample_buffer.hpp"
-#include "telemetry/sensor_data.hpp"
-#include "rocket_state.hpp"
-#include "telemetry/telem_source.hpp"
+#include <hud/hud_app.hpp>
+#include <telemetry/sample_buffer.hpp>
+#include <telemetry/sensor_data.hpp>
+#include <state/rocket_state.hpp>
+#include <telemetry/telem_source.hpp>
 
 void ReadSamples(HudApp& app, TelemetrySource &tsrc);
 

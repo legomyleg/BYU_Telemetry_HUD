@@ -1,5 +1,5 @@
 #pragma once
-#include "rocket_state.hpp"
+#include <state/rocket_state.hpp>
 
 struct Biases {
     Vector3 accel = {0,0,0};

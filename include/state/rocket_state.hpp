@@ -1,9 +1,10 @@
 #pragma once
+#include <chrono>
 #include <cmath>
-#include "raylib.h"
-#include "raymath.h"
-#include "../telemetry/sensor_data.hpp"
-#include "../telemetry/rolling_sample_window.hpp"
+#include <raylib.h>
+#include <raymath.h>
+#include <telemetry/sensor_data.hpp>
+#include <telemetry/rolling_sample_window.hpp>
 #include <string>
 using std::string;
 
@@ -89,4 +90,6 @@ struct RocketState {
     float altAGL() const {
         return altitude - ground_altitude;
     }
+
+    RocketState(std::chrono::microseconds buffer_size) : sampleWindow(buffer_size) {}
 };

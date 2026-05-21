@@ -1,12 +1,11 @@
-#include "state_update.hpp"
-#include "hud/hud_app.hpp"
-#include "state/calibration.hpp"
-#include "state/rocket_state.hpp"
-#include "telemetry/rolling_sample_window.hpp"
-#include "telemetry/telem_source.hpp"
-#include "telemetry/telemetry_parse.hpp"
+#include <state/state_update.hpp>
+#include <hud/hud_app.hpp>
+#include <state/calibration.hpp>
+#include <state/rocket_state.hpp>
+#include <telemetry/rolling_sample_window.hpp>
+#include <telemetry/telem_source.hpp>
+#include <telemetry/telemetry_parse.hpp>
 #include <cassert>
-#include <iostream>
 
 void ReadSamples(HudApp &app, TelemetrySource &tsrc) {
     app.data_buffer += tsrc.read_available();
@@ -86,9 +85,9 @@ void UpdateState(HudApp &app, SampleBuffer &samples, TelemetrySource &tsrc) {
     } else if (app.state.stage == FlightStage::Calibrating) {
 
         // Calibrating the biases
-        app.biases.accel = app.state.sampleWindow.avg_accel();
-        app.biases.gyro = app.state.sampleWindow.avg_gyro();
-        app.state.ground_altitude = app.state.sampleWindow.avg_alt_m();
+        app.biases.accel = app.state.sampleWindow.avg_accel_all();
+        app.biases.gyro = app.state.sampleWindow.avg_gyro_all();
+        app.state.ground_altitude = app.state.sampleWindow.avg_alt_m_all();
 
         app.state.stage = FlightStage::Pad;
     }

@@ -1,4 +1,4 @@
-#include "serial.hpp"
+#include <telemetry/serial.hpp>
 
 SerialPort::SerialPort(const string& port_name, speed_t baud_rate) {
     fd = open(port_name.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);

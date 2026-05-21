@@ -1,5 +1,6 @@
+#include <chrono>
 #define RLIGHTS_IMPLEMENTATION
-#include "hud_app.hpp"
+#include <hud/hud_app.hpp>
 #include <raymath.h>
 
 void HudApp::unload() {
@@ -16,8 +17,8 @@ void orient_model(HudApp &app) {
     app.rocket.transform = rot;   
 }
 
-HudApp SetupHudApp() {
-    HudApp app{};
+HudApp SetupHudApp(std::chrono::microseconds buffer_size) {
+    HudApp app(buffer_size);
 
     SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_FULLSCREEN_MODE);
     InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), "BYU Telemetry HUD");

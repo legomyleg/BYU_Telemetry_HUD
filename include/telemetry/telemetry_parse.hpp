@@ -2,8 +2,8 @@
 
 #include <vector>
 #include <queue>
-#include "raylib.h"
-#include "raymath.h"
+#include <raylib.h>
+#include <raymath.h>
 #include <cmath>
 #include "sensor_data.hpp"
 #include "sample_buffer.hpp"
