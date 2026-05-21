@@ -1,87 +1,122 @@
 #pragma once
 #include "sensor_data.hpp"
-#include "raylib.h"
-#ifndef WINDOW_SIZE
-#define WINDOW_SIZE 60
-#endif
+#include <raylib.h>
+#include <vector>
+#include <chrono>
+using std::vector;
+using std::chrono::microseconds;
 
 class RollingSampleWindow {
 private:
-    SensorData window[WINDOW_SIZE];
-    int next;
-    int count;
-public:
-    void add_sample(SensorData sample) {
-      window[next] = sample;
-      next = (next + 1) % WINDOW_SIZE;
-      if (count < WINDOW_SIZE) {
-          count++;
-      }
+    vector<SensorData> _window;
+    microseconds _buffer_duration;
+    int _incurred_time;
+    int _ilatest = 0;
+    int _next = 0;
+
+    void window_insert(int i, const SensorData& data) {
+        if (i == 0) {
+            _window.emplace_back(data);
+        } else {
+            _window.insert(_window.begin() + i, data);
+        }
     }
+
+public:
+
+    RollingSampleWindow(microseconds buf_duration) : _buffer_duration(buf_duration) {}
 
     bool full() {
-      return count == WINDOW_SIZE;
+        return (_buffer_duration.count() - _incurred_time) < 50;
     }
 
-    bool empty() const {
-      return count == 0;
+    bool empty() {
+        return _window.empty();
     }
 
-    int size() const {
-      return count;
+    SensorData latest() {
+        return _window[_ilatest];
     }
 
-    Vector3 avg_accel() const {
-      if (empty()) {
-          return {0, 0, 0};
-      }
+    void add_sample(SensorData data) {
+        int time_increase = data.t_us - latest().t_us;
+        _incurred_time += time_increase;
 
-      float sum_x = 0.0f;
-      float sum_y = 0.0f;
-      float sum_z = 0.0f;
+        if ((_incurred_time + time_increase) > _buffer_duration.count()) {
 
-      for (int i=0; i < count; i++) {
-          sum_x += window[i].ax;
-          sum_y += window[i].ay;
-          sum_z += window[i].az;
-      }
+            _incurred_time -= _window[_next].t_us;
+            _window[_next] = data;
 
-      return {sum_x / count, sum_y / count, sum_z / count};
+            _ilatest = _next;
+            _next = _next + 1 % _window.size();
+
+        } else {
+
+            window_insert(_next, data);
+            _ilatest = _next;
+            _next = _next + 1 % _window.size();
+
+        }
     }
 
-    Vector3 avg_gyro() const {
-      if (empty()) {
-          return {0, 0, 0};
-      }
-
-      float sum_x = 0.0f;
-      float sum_y = 0.0f;
-      float sum_z = 0.0f;
-
-      for (int i=0; i < count; i++) {
-          sum_x += window[i].gx;
-          sum_y += window[i].gy;
-          sum_z += window[i].gz;
-      }
-
-      return {sum_x / count, sum_y / count, sum_z / count};
-    }
-
-    float avg_alt_m() const {
-        if (empty()) {
-            return 0;
+    Vector3 avg_accel(const microseconds& duration) {
+        if (duration > _buffer_duration) {
+            return avg_accel(_buffer_duration);
         }
 
-        float sum_alt = 0;
-        for (int i=0; i < count; i++) {
-            sum_alt += window[i].altM;
+        float sum_x, sum_y, sum_z;
+        int samples_read;
+        int time_count;
+        int start_time = latest().t_us;
+        int i = _ilatest;
+
+        while (time_count < _buffer_duration.count()) {
+            auto data = _window[i];
+            sum_x += data.ax;
+            sum_y += data.ay;
+            sum_z += data.az;
+
+            samples_read++;
+            time_count = data.t_us - start_time;
+
+            i = _window.size() + (i - 1) % _window.size();
+        }
+        
+        return {sum_x / samples_read, sum_y / samples_read, sum_z / samples_read};
+    }
+
+    Vector3 avg_accel_all() {
+        return avg_accel(_buffer_duration);
+    }
+
+    Vector3 avg_gyro(const microseconds& duration) {
+        if (duration > _buffer_duration) {
+            return avg_gyro(_buffer_duration);
         }
 
-        return sum_alt / count;
+        float sum_x, sum_y, sum_z;
+        int samples_read;
+        int time_count;
+        int start_time = latest().t_us;
+        int i = _ilatest;
+
+        while (time_count < _buffer_duration.count()) {
+            auto data = _window[i];
+            sum_x += data.gx;
+            sum_y += data.gy;
+            sum_z += data.gz;
+
+            samples_read++;
+            time_count = data.t_us - start_time;
+
+            i = _window.size() + (i - 1) % _window.size();
+        }
+        
+        return {sum_x / samples_read, sum_y / samples_read, sum_z / samples_read};
     }
 
-    int percent_full() const {
-      float p = (float)count / (float)WINDOW_SIZE;
-      return static_cast<int>(p * 100.0f);
+    Vector3 avg_gyro_all() {
+        return avg_gyro(_buffer_duration);
     }
+
 };
