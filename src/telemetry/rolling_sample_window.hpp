@@ -26,15 +26,15 @@ public:
 
     RollingSampleWindow(microseconds buf_duration) : _buffer_duration(buf_duration) {}
 
-    bool full() {
+    bool full() const {
         return (_buffer_duration.count() - _incurred_time) < 50;
     }
 
-    bool empty() {
+    bool empty() const {
         return _window.empty();
     }
 
-    SensorData latest() {
+    SensorData latest() const {
         return _window[_ilatest];
     }
 
@@ -63,7 +63,7 @@ public:
         }
     }
 
-    Vector3 avg_accel(const microseconds& duration) {
+    Vector3 avg_accel(const microseconds& duration) const {
         if (duration > _buffer_duration) {
             return avg_accel(_buffer_duration);
         }
@@ -89,11 +89,11 @@ public:
         return {sum_x / samples_read, sum_y / samples_read, sum_z / samples_read};
     }
 
-    Vector3 avg_accel_all() {
+    Vector3 avg_accel_all() const {
         return avg_accel(_buffer_duration);
     }
 
-    Vector3 avg_gyro(const microseconds& duration) {
+    Vector3 avg_gyro(const microseconds& duration) const {
         if (duration > _buffer_duration) {
             return avg_gyro(_buffer_duration);
         }
@@ -119,11 +119,11 @@ public:
         return {sum_x / samples_read, sum_y / samples_read, sum_z / samples_read};
     }
 
-    Vector3 avg_gyro_all() {
+    Vector3 avg_gyro_all() const {
         return avg_gyro(_buffer_duration);
     }
 
-    float avg_alt_m(const microseconds& duration) {
+    float avg_alt_m(const microseconds& duration) const {
         if (duration > _buffer_duration) {
             return avg_alt_m(_buffer_duration);
         }
@@ -148,8 +148,13 @@ public:
         return sum / samples_read;
     }
 
-    float avg_alt_m_all() {
+    float avg_alt_m_all() const {
         return avg_alt_m(_buffer_duration);
+    }
+
+    int percent_full() {
+        float p = (float)_buffer_duration.count() / (float)_incurred_time;
+        return static_cast<int>(p * 100.0f);
     }
 
 };
