@@ -1,5 +1,6 @@
 #include <string_view>
 
+
 namespace Logger {
 
     enum class LOG_LEVEL {
@@ -12,7 +13,7 @@ namespace Logger {
     };
 
     inline bool enabled = false;
-    inline LOG_LEVEL log_level = LOG_LEVEL::ERROR;
+    inline LOG_LEVEL log_level = LOG_LEVEL::WARN;
 };
 
 namespace Logger {
@@ -21,9 +22,49 @@ namespace Logger {
     }
 }
 
-#define LOG(msg, level) \
+// SOME MACROS TO DEFINE LOGGING
+#if ENABLE_LOGGING
+#define LOG_TRACE(msg) \
     do { \
         if (Logger::enabled) { \
-            Logger::detail::write_log(msg, level); \
+            Logger::detail::write_log(msg, Logger::LOG_LEVEL::TRACE); \
         } \
     } while (0)
+#define LOG_DEBUG(msg) \
+    do { \
+        if (Logger::enabled) { \
+            Logger::detail::write_log(msg, Logger::LOG_LEVEL::DEBUG); \
+        } \
+    } while (0)
+#define LOG_INFO(msg) \
+    do { \
+        if (Logger::enabled) { \
+            Logger::detail::write_log(msg, Logger::LOG_LEVEL::INFO); \
+        } \
+    } while (0)
+#define LOG_WARN(msg) \
+    do { \
+        if (Logger::enabled) { \
+            Logger::detail::write_log(msg, Logger::LOG_LEVEL::WARN); \
+        } \
+    } while (0)
+#define LOG_ERROR(msg) \
+    do { \
+        if (Logger::enabled) { \
+            Logger::detail::write_log(msg, Logger::LOG_LEVEL::ERROR); \
+        } \
+    } while (0)
+#define LOG_CRITICAL(msg) \
+    do { \
+        if (Logger::enabled) { \
+            Logger::detail::write_log(msg, Logger::LOG_LEVEL::CRITICAL); \
+        } \
+    } while (0)
+#else
+#define LOG_TRACE(msg) do {} while (0)
+#define LOG_DEBUG(msg) do {} while (0)
+#define LOG_INFO(msg) do {} while (0)
+#define LOG_WARN(msg) do {} while (0)
+#define LOG_ERROR(msg) do {} while (0)
+#define LOG_CRITICAL(msg) do {} while (0)
+#endif

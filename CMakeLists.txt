@@ -15,6 +15,7 @@ add_executable(BYU_Telemetry_HUD
         src/telemetry/serial.cpp
         src/telemetry/telemetry_parse.cpp
         src/hud/draw/telem.cpp
+        src/logging/logger.cpp
 )
 
 add_executable(static_test
@@ -26,6 +27,7 @@ add_executable(static_test
         src/telemetry/telemetry_parse.cpp
         src/telemetry/CsvTelemSource.cpp
         src/state/state_update.cpp
+        src/logging/logger.cpp
 )
 
 add_executable(raven_test
@@ -37,11 +39,18 @@ add_executable(raven_test
         src/telemetry/telemetry_parse.cpp
         src/telemetry/CsvTelemSource.cpp
         src/state/state_update.cpp
+        src/logging/logger.cpp
 )
 
 target_compile_features(BYU_Telemetry_HUD PRIVATE cxx_std_20)
 target_compile_features(static_test PRIVATE cxx_std_20)
 target_compile_features(raven_test PRIVATE cxx_std_20)
+
+target_compile_definitions(BYU_Telemetry_HUD PRIVATE ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+target_compile_definitions(static_test PRIVATE ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+target_compile_definitions(raven_test PRIVATE ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
+target_compile_definitions(raven_test PRIVATE ENABLE_LOGGING=1)
 
 target_include_directories(BYU_Telemetry_HUD PRIVATE include)
 target_include_directories(static_test PRIVATE include)
