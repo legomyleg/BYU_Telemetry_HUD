@@ -25,13 +25,24 @@ namespace {
         static std::ofstream file([] {
                 fs::path root(ROOT_DIR);
                 fs::path log_path = root / "logs";
+                if (!fs::exists(log_path)) {
+                    fs::create_directory(log_path);
+                }
 
                 auto now = std::chrono::system_clock::now();
 
-                fs::path new_path = log_path / std::format(
+                auto formatted_path = std::format(
                         "{:%Y-%m-%d_%H-%M-%S}.log", now
                 );
-                assert(!fs::exists(new_path));
+
+                int append_digit = 0;
+                while (fs::exists(log_path / formatted_path)) {
+                    formatted_path = std::format(
+                            "{:%Y-%m-%d_%H-%M-%S}_{}.log", now, append_digit
+                    );
+                    append_digit++;
+                }
+                auto new_path = log_path / formatted_path;
 
                 return new_path.string();
         }());
