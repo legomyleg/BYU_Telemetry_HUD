@@ -12,7 +12,7 @@ class RollingSampleWindow {
 private:
     vector<SensorData> _window;
     microseconds _buffer_duration;
-    int _incurred_time;
+    int _incurred_time = 0;
     int _ilatest = 0;
     int _next = 0;
 
@@ -37,6 +37,9 @@ public:
     }
 
     SensorData latest() const {
+
+
+
         return _window[_ilatest];
     }
 
@@ -44,28 +47,33 @@ public:
 
         LOG_TRACE("Entered add_sample.");
 
+        if (_window.size() == 0) {
+            _window.emplace_back(data);
+        } 
+
         int time_increase = data.t_us - latest().t_us;
-        _incurred_time += time_increase;
 
         if ((_incurred_time + time_increase) > _buffer_duration.count()) {
 
             int back_i = _next;
-            int one_up = back_i + 1 % _window.size();
+            int one_up = (back_i + 1) % _window.size();
             _incurred_time -= _window[one_up].t_us - _window[back_i].t_us;
 
             
             _window[_next] = data;
 
             _ilatest = _next;
-            _next = _next + 1 % _window.size();
+            _next = (_next + 1) % _window.size();
 
         } else {
 
             window_insert(_next, data);
             _ilatest = _next;
-            _next = _next + 1 % _window.size();
+            _next = (_next + 1) % _window.size();
 
         }
+
+        _incurred_time += time_increase;
 
         LOG_TRACE("Exiting add_sample.");
     }
@@ -75,13 +83,15 @@ public:
             return avg_accel(_buffer_duration);
         }
 
-        float sum_x, sum_y, sum_z;
-        int samples_read;
-        int time_count;
+        float sum_x = 0;
+        float sum_y = 0;
+        float sum_z = 0;
+        int samples_read = 0;
+        int time_count = 0;
         int start_time = latest().t_us;
         int i = _ilatest;
 
-        while (time_count < _buffer_duration.count()) {
+        while (time_count < duration.count()) {
             auto data = _window[i];
             sum_x += data.ax;
             sum_y += data.ay;
@@ -90,7 +100,7 @@ public:
             samples_read++;
             time_count = data.t_us - start_time;
 
-            i = _window.size() + (i - 1) % _window.size();
+            i = (_window.size() + (i - 1)) % _window.size();
         }
         
         return {sum_x / samples_read, sum_y / samples_read, sum_z / samples_read};
@@ -105,13 +115,15 @@ public:
             return avg_gyro(_buffer_duration);
         }
 
-        float sum_x, sum_y, sum_z;
-        int samples_read;
-        int time_count;
+        float sum_x = 0;
+        float sum_y = 0;
+        float sum_z = 0;
+        int samples_read = 0;
+        int time_count = 0;
         int start_time = latest().t_us;
         int i = _ilatest;
 
-        while (time_count < _buffer_duration.count()) {
+        while (time_count < duration.count()) {
             auto data = _window[i];
             sum_x += data.gx;
             sum_y += data.gy;
@@ -120,7 +132,7 @@ public:
             samples_read++;
             time_count = data.t_us - start_time;
 
-            i = _window.size() + (i - 1) % _window.size();
+            i = (_window.size() + (i - 1)) % _window.size();
         }
         
         return {sum_x / samples_read, sum_y / samples_read, sum_z / samples_read};
@@ -135,13 +147,13 @@ public:
             return avg_alt_m(_buffer_duration);
         }
 
-        float sum;
-        int samples_read;
-        int time_count;
+        float sum = 0;
+        int samples_read = 0;
+        int time_count = 0;
         int start_time = latest().t_us;
         int i = _ilatest;
 
-        while (time_count < _buffer_duration.count()) {
+        while (time_count < duration.count()) {
             auto data = _window[i];
 
             sum += data.altM;
@@ -149,7 +161,7 @@ public:
             samples_read++;
             time_count = data.t_us - start_time;
 
-            i = _window.size() + (i - 1) % _window.size();
+            i = (_window.size() + (i - 1)) % _window.size();
         }
         
         return sum / samples_read;
