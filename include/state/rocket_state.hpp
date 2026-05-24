@@ -85,7 +85,7 @@ struct RocketState {
     FlightStage stage = FlightStage::Calibrating;
 
     SensorData latest_sample{};
-    RollingSampleWindow sampleWindow;
+    SampleRingBuffer sampleWindow;
 
     float altAGL() const {
         return altitude - ground_altitude;
