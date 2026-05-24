@@ -3,6 +3,8 @@
 #include <raylib.h>
 #include <vector>
 #include <chrono>
+#include <logging/logger.hpp>
+
 using std::vector;
 using std::chrono::microseconds;
 
@@ -24,7 +26,7 @@ private:
 
 public:
 
-    RollingSampleWindow(microseconds buf_duration) : _buffer_duration(buf_duration) {}
+    RollingSampleWindow(microseconds buf_duration) : _buffer_duration(buf_duration) { LOG_TRACE("Sample window init."); }
 
     bool full() const {
         return (_buffer_duration.count() - _incurred_time) < 50;
@@ -39,6 +41,9 @@ public:
     }
 
     void add_sample(SensorData data) {
+
+        LOG_TRACE("Entered add_sample.");
+
         int time_increase = data.t_us - latest().t_us;
         _incurred_time += time_increase;
 
@@ -61,6 +66,8 @@ public:
             _next = _next + 1 % _window.size();
 
         }
+
+        LOG_TRACE("Exiting add_sample.");
     }
 
     Vector3 avg_accel(const microseconds& duration) const {

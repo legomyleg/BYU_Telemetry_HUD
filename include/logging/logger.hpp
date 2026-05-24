@@ -1,6 +1,5 @@
 #include <string_view>
 
-
 namespace Logger {
 
     enum class LOG_LEVEL {

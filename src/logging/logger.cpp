@@ -4,6 +4,11 @@
 #include <fstream>
 #include <filesystem>
 #include <chrono>
+#include <iostream>
+
+using std::chrono::seconds;
+using std::chrono::system_clock;
+using std::chrono::time_point_cast;
 
 namespace fs = std::filesystem;
 
@@ -29,7 +34,7 @@ namespace {
                     fs::create_directory(log_path);
                 }
 
-                auto now = std::chrono::system_clock::now();
+                auto now = time_point_cast<seconds>(system_clock::now());
 
                 auto formatted_path = std::format(
                         "{:%Y-%m-%d_%H-%M-%S}.log", now
@@ -57,8 +62,8 @@ void Logger::detail::write_log(std::string_view msg, LOG_LEVEL level) {
     }
 
     std::ofstream& file = log_file();
-    auto now = std::chrono::system_clock::now();
-    auto time = std::format("{:%H-%M-%S}", now);
-    auto log_msg = std::format("{} [{}]: {}\n", time, level_to_string(level), msg);
-    file << log_msg;
+    auto now = time_point_cast<seconds>(system_clock::now());
+    auto time = std::format("{:%H:%M:%S}", now);
+    auto log_msg = std::format("{} [{}]: {}", time, level_to_string(level), msg);
+    file << log_msg << std::endl;
 }
