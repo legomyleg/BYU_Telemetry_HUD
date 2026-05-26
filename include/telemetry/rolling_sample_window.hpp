@@ -23,11 +23,15 @@ private:
     size_t _next = 0;
 
     size_t back_one() const {
+        if (_buffer.size() == 0) return 0;
+
         return (_next + _buffer.size() - 1) % _buffer.size();
     }
 
     size_t up_one() const {
-        return (_next + _buffer.size() - 1) % _buffer.size();
+        if (_buffer.size() == 0) return 0;
+
+        return (_next + 1) % _buffer.size();
     }
 
 public:
@@ -35,13 +39,19 @@ public:
     SampleRingBuffer(const microsec& buffer_duration_us) : _bufdur(buffer_duration_us) {
         if (buffer_duration_us < 500000) {
 
-            LOG_WARN("Ring buffer created with duration of less than half a second." + 
-                    " Creating buffer of one second.");
+            LOG_WARN(std::string_view("Ring buffer created with duration of less than half a second.") + 
+                    std::string_view(" Creating buffer of one second."));
 
             _bufdur = ONE_SECOND;
+        } else if (buffer_duration_us > 3000000) {
+
+            LOG_WARN("MAX Buffer size is 3 seconds. Creating buffer of 3 seconds.");
+
+            _bufdur = 3000000;
+
         }
 
-        _buffer.reserve(500);
+        _buffer.resize(180);
     }
 
     bool empty() const {
@@ -49,12 +59,14 @@ public:
     }
 
     bool full() const {
+        if (_current_total_dur >= _bufdur) return true;
         return (_bufdur - _current_total_dur) < 50;
     }
 
     void add_sample(const SensorData data) {
         if (empty()) {
             _buffer.emplace_back(data);
+            return;
         }
 
         auto& prev = _buffer[back_one()];
@@ -68,17 +80,21 @@ public:
 
             _buffer[_next] = data;
 
+            _next = up_one();
+
         } else if (_next == 0) {
             _buffer.emplace_back(data);
         } else {
             _buffer.insert(_buffer.begin() + _next, data);
+            _next = up_one();
         }
 
-        _current_total_dur += data.t_us;
-
+        _current_total_dur += time_diff;
     }
 
     Vector3 avg_accel(microsec duration) const {
+        if (empty()) return {0,0,0};
+
         if (duration > _bufdur) {
             return avg_accel(_bufdur);
         }
@@ -90,7 +106,7 @@ public:
         microsec time_count = 0;
 
         const auto& prev = _buffer[back_one()];
-        int start_time = prev.t_us;
+        microsec start_time = prev.t_us;
         size_t i = back_one();
 
         while (time_count < duration) {
@@ -100,7 +116,7 @@ public:
             sum_z += data.az;
 
             samples_read++;
-            time_count = data.t_us - start_time;
+            time_count = start_time - data.t_us;
 
             i = (_buffer.size() + (i - 1)) % _buffer.size();
         }
@@ -113,6 +129,8 @@ public:
     }
 
     Vector3 avg_gyro(microsec duration) const {
+        if (empty()) return {0,0,0};
+
         if (duration > _bufdur) {
             return avg_gyro(_bufdur);
         }
@@ -134,7 +152,7 @@ public:
             sum_z += data.gz;
 
             samples_read++;
-            time_count = data.t_us - start_time;
+            time_count = start_time - data.t_us;
 
             i = (_buffer.size() + (i - 1)) % _buffer.size();
         }
@@ -147,6 +165,8 @@ public:
     }
 
     float avg_alt_m(microsec duration) const {
+        if (empty()) return 0;
+
         if (duration > _bufdur) {
             return avg_alt_m(_bufdur);
         }
@@ -165,7 +185,7 @@ public:
             sum += data.altM;
 
             samples_read++;
-            time_count = data.t_us - start_time;
+            time_count = start_time - data.t_us;
 
             i = (_buffer.size() + (i - 1)) % _buffer.size();
         }
