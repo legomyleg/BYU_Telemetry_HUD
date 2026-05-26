@@ -1,7 +1,7 @@
 #pragma once
 #include <state/rocket_state.hpp>
-#include <telemetry/rolling_sample_window.hpp>
+#include <telemetry/sample_ring_buffer.hpp>
 
-inline FlightStage get_stage(RollingSampleWindow &window) {
+inline FlightStage get_stage(SampleRingBuffer &window) {
 
 }

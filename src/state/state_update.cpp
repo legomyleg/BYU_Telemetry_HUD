@@ -2,7 +2,7 @@
 #include <hud/hud_app.hpp>
 #include <state/calibration.hpp>
 #include <state/rocket_state.hpp>
-#include <telemetry/rolling_sample_window.hpp>
+#include <telemetry/sample_ring_buffer.hpp>
 #include <telemetry/telem_source.hpp>
 #include <telemetry/telemetry_parse.hpp>
 #include <cassert>

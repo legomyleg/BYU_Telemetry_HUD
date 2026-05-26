@@ -4,7 +4,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <telemetry/sensor_data.hpp>
-#include <telemetry/rolling_sample_window.hpp>
+#include <telemetry/sample_ring_buffer.hpp>
 #include <string>
 using std::string;
 
