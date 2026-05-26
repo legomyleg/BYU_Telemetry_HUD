@@ -1,5 +1,4 @@
 #pragma once
-#include <chrono>
 #include <cmath>
 #include <raylib.h>
 #include <raymath.h>
@@ -91,5 +90,5 @@ struct RocketState {
         return altitude - ground_altitude;
     }
 
-    RocketState(std::chrono::microseconds buffer_size) : sampleWindow(buffer_size) {}
+    RocketState(uint64_t buffer_size) : sampleWindow(buffer_size) {}
 };

@@ -2,12 +2,11 @@
 #include <hud/hud_app.hpp>
 #include <hud/draw/hud_draw.hpp>
 #include <state/state_update.hpp>
-#include <chrono>
 #include <raylib.h>
 #include <hud/draw/home_window.hpp>
 #include <state/rocket_state.hpp>
 
-void RunHud(TelemetrySource *data_src, std::chrono::microseconds buffer_size, bool no_calibrate) {
+void RunHud(TelemetrySource *data_src, uint64_t buffer_size, bool no_calibrate) {
     bool initialized = false;
 
     auto app = SetupHudApp(buffer_size);

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../config.hpp"
+#include <hud/config.hpp>
 #include "raylib.h"
-#include "../hud_app.hpp"
-#include "../colors.hpp"
+#include <hud/hud_app.hpp>
+#include <hud/colors.hpp>
 #include <format>
 #include <string>
 using std::format, std::string;

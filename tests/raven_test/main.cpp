@@ -1,8 +1,6 @@
 #include <hud/run_hud.hpp>
 #include <telemetry/CsvTelemSource.hpp>
 #include <telemetry/telemetry_config.hpp>
-#include <chrono>
-#include <string>
 #include <logging/logger.hpp>
 
 int main() {
@@ -11,11 +9,10 @@ int main() {
 
     LOG_TRACE("Entering main.cpp");
 
-    std::string path = "/Users/pearsonmorris/Developer/BYU_Telemetry_HUD/data/test_data/test_data.csv";
+    std::string path = "/Users/pearsonmorris/Developer/BYU_HUD_Developement/BYU_Telemetry_HUD/data/test_data/new_test_data.csv";
     auto src = CsvTelemSource(33333, path);
 
-    auto bufsize = microseconds(TWO_SECOND);
-    RunHud(&src, bufsize, true);
+    RunHud(&src, 2'000'000, true);
 
     LOG_TRACE("Exiting main.cpp");
 }

@@ -80,7 +80,7 @@ void UpdateState(HudApp &app, SampleBuffer &samples, TelemetrySource &tsrc) {
 
     ReadSamples(app, tsrc);
 
-    if (!app.state.sampleWindow.full()) {
+    if (!app.state.sampleWindow.duration_full()) {
         return;
     } else if (app.state.stage == FlightStage::Calibrating) {
 

@@ -1,7 +1,7 @@
-#include "raylib.h"
-#include "../hud_app.hpp"
-#include "../colors.hpp"
-#include "utils.hpp"
+#include <raylib.h>
+#include <hud/hud_app.hpp>
+#include <hud/colors.hpp>
+#include <hud/draw/utils.hpp>
 
 inline void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &colors, const RocketState& state) {
     float margin = 15.0f;

@@ -1,15 +1,15 @@
 #pragma once
-#include "raylib.h"
-#include "rlights.h"
-#include "hud_layout.hpp"
-#include "../telemetry/sample_buffer.hpp"
-#include "../state/rocket_state.hpp"
-#include "config.hpp"
-#include "../telemetry/serial.hpp"
-#include "../telemetry/telemetry_stats.hpp"
-#include "colors.hpp"
-#include "state/calibration.hpp"
-#include <chrono>
+#include <raylib.h>
+#include <hud/rlights.h>
+#include <hud/hud_layout.hpp>
+#include <telemetry/sample_buffer.hpp>
+#include <state/rocket_state.hpp>
+#include <hud/config.hpp>
+#include <telemetry/serial.hpp>
+#include <telemetry/telemetry_stats.hpp>
+#include <hud/colors.hpp>
+#include <state/calibration.hpp>
+#include <cstdint>
 #include <string>
 #include <vector>
 using std::vector;
@@ -40,8 +40,8 @@ struct HudApp {
 
     void unload();
 
-    HudApp(std::chrono::microseconds buffer_size) : state(buffer_size) {}
+    HudApp(uint64_t buffer_size) : state(buffer_size) {}
 };
 
-HudApp SetupHudApp(std::chrono::microseconds buffer_size);
+HudApp SetupHudApp(uint64_t buffer_size);
 void UpdateShader(Camera3D camera, Shader shader, Light light);

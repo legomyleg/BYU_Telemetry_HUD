@@ -4,13 +4,11 @@
 #include <telemetry/sensor_data.hpp>
 #include <raylib.h>
 #include <array>
-#include <chrono>
 #include <logging/logger.hpp>
 #include <format>
 #include <cstdint>
 
 using std::array;
-using std::chrono::microseconds;
 
 using std::uint64_t;
 using microsec = uint64_t;
@@ -61,6 +59,12 @@ public:
     }
 
     void add_sample(const SensorData& data) {
+
+        LOG_DEBUG(std::format(
+                    "Adding data point of time: {} us",
+                    data.t_us,
+                    data.ax
+                    ));
 
         assert(sample_count == 0 || data.t_us > front().t_us);
 
@@ -180,6 +184,12 @@ public:
 
     float avg_alt_m_all() const {
         return avg_alt_m(_bufdur);
+    }
+
+    int percent_full() const {
+        auto t = front().t_us - back().t_us;
+        float p = (float)t / (float)_bufdur;
+        return static_cast<int>(p * 100.f);
     }
 
 };
