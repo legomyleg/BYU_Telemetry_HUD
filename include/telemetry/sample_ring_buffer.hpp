@@ -38,6 +38,7 @@ private:
 public:
 
     explicit SampleRingBuffer(microsec buffer_duration_us) : _bufdur(buffer_duration_us) {
+        LOG_INFO("Buffer created");
         if (buffer_duration_us > 3'000'000) {
             LOG_WARN(std::format("Ring buffer duration too high ({} us). Setting buffer to length 3sec.", buffer_duration_us));
             _bufdur = 3'000'000;
@@ -50,6 +51,12 @@ public:
 
     bool empty() const {
         return sample_count == 0;
+    }
+
+    void clear() {
+        head = 0;
+        tail = 0;
+        sample_count = 0;
     }
 
     bool duration_full() const {

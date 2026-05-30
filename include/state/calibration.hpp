@@ -1,5 +1,5 @@
 #pragma once
-#include <state/rocket_state.hpp>
+#include <raylib.h>
 
 struct Biases {
     Vector3 accel = {0,0,0};
@@ -43,7 +43,7 @@ inline constexpr float R2[3] = {0, -1, 0};
 inline constexpr float R3[3] = {1, 0, 0};
 // DO NOT CHANGE TRANSFORMATION MATRIX
 
-inline Vec3 calibrate_sensor_vector(Vec3 vals) {
+inline Vector3 calibrate_sensor_vector(Vector3 vals) {
     float x1 = vals.x*R1[0] + vals.y*R1[1] + vals.z*R1[2];
     float y1 = vals.x*R2[0] + vals.y*R2[1] + vals.z*R2[2];
     float z1 = vals.x*R3[0] + vals.y*R3[1] + vals.z*R3[2];

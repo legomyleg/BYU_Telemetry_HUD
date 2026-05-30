@@ -33,7 +33,6 @@ struct HudApp {
     uint64_t last_measured_time;
     RocketState state;
     TelemetryStats telemetry;
-    Biases biases;
     vector<AltAtT> measuredAlts;
 
     string data_buffer;

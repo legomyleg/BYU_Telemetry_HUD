@@ -1,3 +1,4 @@
+#include <raylib.h>
 #include <state/state_update.hpp>
 #include <hud/hud_app.hpp>
 #include <state/calibration.hpp>
@@ -19,7 +20,7 @@ void ReadSamples(HudApp &app, TelemetrySource &tsrc) {
             try {
                 SensorData sample = parseLine(line);
                 app.sample_buffer.push(sample);
-                app.state.sampleWindow.add_sample(sample);
+                app.state.sample_buffer.add_sample(sample);
             } catch (...) {
                 continue;
             }
@@ -31,7 +32,7 @@ void update_vertical_velocity(float da, float dt_s, float &vert_velocity) {
     vert_velocity = da / dt_s;
 }
 
-void update_velocity(SensorData &s, float dt_s, Vec3 &velocity, Biases &biases) {
+void update_velocity(SensorData &s, float dt_s, Vector3 &velocity, Biases &biases) {
     float ax_use, ay_use, az_use;
 
     float total_accel = sqrt(s.hgx*s.hgx + s.hgy*s.hgy + s.hgz*s.hgz);
@@ -80,16 +81,10 @@ void UpdateState(HudApp &app, SampleBuffer &samples, TelemetrySource &tsrc) {
 
     ReadSamples(app, tsrc);
 
-    if (!app.state.sampleWindow.duration_full()) {
+    if (!app.state.sample_buffer.duration_full()) {
         return;
     } else if (app.state.stage == FlightStage::Calibrating) {
 
-        // Calibrating the biases
-        app.biases.accel = app.state.sampleWindow.avg_accel_all();
-        app.biases.gyro = app.state.sampleWindow.avg_gyro_all();
-        app.state.ground_altitude = app.state.sampleWindow.avg_alt_m_all();
-
-        app.state.stage = FlightStage::Pad;
     }
 
     float dt_s;
@@ -109,8 +104,8 @@ void UpdateState(HudApp &app, SampleBuffer &samples, TelemetrySource &tsrc) {
             dt_s = (data.t_us - app.last_measured_time) / 1000000.0f;
             da_m = data.altM - app.state.altitude;
 
-            update_orientation(data, dt_s, app.state.orientation, app.biases);
-            update_velocity(data, dt_s, app.state.velocity, app.biases);
+            update_orientation(data, dt_s, app.state.orientation, app.state.biases);
+            update_velocity(data, dt_s, app.state.velocity, app.state.biases);
             update_vertical_velocity(da_m, dt_s, app.state.vertical_velocity_mps);
             update_samples_per_sec(dt_s, app.telemetry.samples_per_sec);
 

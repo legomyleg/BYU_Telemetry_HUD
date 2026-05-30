@@ -219,7 +219,7 @@ void DrawCalibratingScreen(const HudApp &app) {
     Rectangle screen = {0, 0, app.layout.screenWidth, app.layout.screenHeight};
     DrawRectangleRec(screen, BLACK);
 
-    string text = std::format("Calibrating...{}%", app.state.sampleWindow.percent_full());
+    string text = std::format("Calibrating...{}%", app.state.sample_buffer.percent_full());
     float yPos = screen.height / 2.0f;
     DrawTextCenteredAtY(app.hudFont, text.c_str(), screen, 30.0f, WHITE, yPos);
 }
