@@ -100,6 +100,10 @@ struct RocketState {
         stage_start_us = sample_buffer.get_most_recent().t_us;
     }
 
+    uint64_t time_in_stage() {
+        return sample_buffer.get_most_recent().t_us - stage_start_us;
+    }
+
     float altAGL() const {
         return altitude - ground_altitude;
     }

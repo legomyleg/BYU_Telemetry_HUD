@@ -1,5 +1,6 @@
 #pragma once
 #include <cassert>
+#include <cstddef>
 #include <telemetry/telemetry_config.hpp>
 #include <telemetry/sensor_data.hpp>
 #include <raylib.h>
@@ -70,12 +71,6 @@ public:
     }
 
     void add_sample(const SensorData& data) {
-
-        LOG_DEBUG(std::format(
-                    "Adding data point of time: {} us",
-                    data.t_us,
-                    data.ax
-                    ));
 
         assert(sample_count == 0 || data.t_us > front().t_us);
 
@@ -174,7 +169,7 @@ public:
         auto newest_time = _buffer[i].t_us;
 
         float sum = 0;
-        size_t total = 0;
+        size_t total_samples = 0;
 
         for (size_t n=0; n < sample_count; n++) {
             const auto &data = _buffer[i];
@@ -183,18 +178,39 @@ public:
 
             sum += data.altM;
 
-            total++;
+            total_samples++;
 
             i = (BUFFER_CAPACITY + i - 1) % BUFFER_CAPACITY;
         }
 
-        if (total == 0) return 0;
+        if (total_samples == 0) return 0;
 
-        return sum / total;
+        return sum / total_samples;
     }
 
     float avg_alt_m_all() const {
         return avg_alt_m(_bufdur);
+    }
+
+    float avg_vert_vel_mps(microsec duration) const {
+        if (sample_count < 2) return 0;
+
+        size_t newest_i = (head + BUFFER_CAPACITY - 1) % BUFFER_CAPACITY;
+        const auto newest_t = _buffer[newest_i].t_us;
+        const auto newest_alt = _buffer[newest_i].altM;
+
+        auto oldest_i = newest_i;
+        for (size_t n=0; n < sample_count; n++) {
+            auto candidate = (oldest_i + BUFFER_CAPACITY - 1) % BUFFER_CAPACITY;
+            if (newest_t - _buffer[candidate].t_us > duration) break;
+            oldest_i = candidate;
+        }
+
+        auto dt_s = (newest_t - _buffer[oldest_i].t_us) / 1'000'000.0f;
+        auto d_alt = newest_alt - _buffer[oldest_i].altM;
+        if (dt_s == 0) return 0;
+
+        return d_alt / dt_s;
     }
 
     int percent_full() const {

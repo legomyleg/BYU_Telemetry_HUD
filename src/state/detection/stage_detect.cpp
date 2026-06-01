@@ -28,7 +28,31 @@ void handle_pad(RocketState& state) {
 }
 
 void handle_boost(RocketState& state) {
-    auto mag = get_mag(state.sample_buffer.avg_accel(ONE_SECOND));
+    constexpr uint64_t ONE_THIRD_SEC = 300'000;
+    auto mag = get_mag(state.sample_buffer.avg_accel(ONE_THIRD_SEC));
+    if (mag < 15.0f && state.time_in_stage() > ONE_SECOND) {
+        state.transition_to(FlightStage::Coast);
+    }
+}
+
+void handle_coast(RocketState& state) {
+    auto vert_vel = state.sample_buffer.avg_vert_vel_mps(HALF_SECOND);
+    if (state.time_in_stage() > 10'000'000 && vert_vel < 10.0f) {
+        state.transition_to(FlightStage::Apogee);
+    }
+}
+
+void handle_apogee(RocketState& state) {
+    if (state.time_in_stage() > 5'000'000) {
+        state.transition_to(FlightStage::Descent);
+    }
+}
+
+void handle_descent(RocketState& state) {
+    auto vert_vel = state.sample_buffer.avg_vert_vel_mps(ONE_SECOND);
+    if (vert_vel < 2.0f) {
+        state.transition_to(FlightStage::Recovery);
+    }
 }
 
 void StageDetect::update(RocketState& state) {
@@ -39,16 +63,20 @@ void StageDetect::update(RocketState& state) {
         
         case FlightStage::Pad:
             handle_pad(state);
-            
+            break;
         case FlightStage::Boost:
-            // Later
+            handle_boost(state);
+            break;
         case FlightStage::Coast:
-            // Later
+            handle_coast(state);
+            break;
         case FlightStage::Apogee:
-            // Later
+            handle_apogee(state);
+            break;
         case FlightStage::Descent:
-            // Later
+            handle_descent(state);
+            break;
         case FlightStage::Recovery:
-            // Later
+            break;
     }
 }
