@@ -5,14 +5,8 @@
 
 using microsec = uint64_t;
 
-struct StageDetector {
-    FlightStage stage;
-    microsec stage_start_us = 0;
+namespace StageDetect {
 
-    void transition_to(FlightStage next, microsec now_us) {
-        stage = next;
-        stage_start_us = now_us;
-    }
-};
+    void update(RocketState& state);
 
-void update(RocketState& state);
+}

@@ -59,6 +59,10 @@ public:
         sample_count = 0;
     }
 
+    const SensorData& get_most_recent() {
+        return front();
+    }
+
     bool duration_full() const {
         if (sample_count < 2) return false;
         auto current_dur = front().t_us - back().t_us;

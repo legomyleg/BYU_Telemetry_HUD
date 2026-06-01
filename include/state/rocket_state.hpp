@@ -87,7 +87,7 @@ struct RocketState {
 
     uint64_t stage_start_us = 0;
 
-    void transition_to(FlightStage new_stage, uint64_t time) {
+    void transition_to(FlightStage new_stage) {
         using StageValue = std::underlying_type_t<FlightStage>;
 
         if (new_stage < stage) {
@@ -97,7 +97,7 @@ struct RocketState {
         }
 
         stage = new_stage;
-        stage_start_us = time;
+        stage_start_us = sample_buffer.get_most_recent().t_us;
     }
 
     float altAGL() const {
