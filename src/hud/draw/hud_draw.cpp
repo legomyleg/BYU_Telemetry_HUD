@@ -10,7 +10,6 @@
 #include <state/rocket_state.hpp>
 #include <hud/draw/utils.hpp>
 #include <hud/draw/sensors.hpp>
-#include <hud/draw/telem.hpp>
 using std::string;
 
 void DrawBackground(const HudBox &box, const ColorPalette &colors) {
@@ -238,6 +237,4 @@ void DrawHud(const HudApp &app){
     DrawStagesBox(app.hudFont, app.layout.stages, app.colors, app.state.stage);
     DrawSensorsBox(app.hudFont, app.layout.sensors, app.colors, app.state);
     DrawGraphBox(app.hudFont, app.layout.graph, app.colors, app.measuredAlts);
-    DrawTelemetryBox(app);
-
 }

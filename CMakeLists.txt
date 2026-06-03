@@ -15,7 +15,7 @@ add_executable(BYU_Telemetry_HUD
         src/state/detection/stage_detect.cpp
         src/telemetry/serial.cpp
         src/telemetry/telemetry_parse.cpp
-        src/hud/draw/telem.cpp
+        
         src/logging/logger.cpp
 )
 
@@ -24,7 +24,7 @@ add_executable(static_test
         src/hud/run_hud.cpp
         src/hud/draw/hud_draw.cpp
         src/hud/hud_app.cpp
-        src/hud/draw/telem.cpp
+        
         src/telemetry/telemetry_parse.cpp
         src/telemetry/CsvTelemSource.cpp
         src/state/state_update.cpp
@@ -36,7 +36,7 @@ add_executable(raven_test
         src/hud/run_hud.cpp
         src/hud/draw/hud_draw.cpp
         src/hud/hud_app.cpp
-        src/hud/draw/telem.cpp
+        
         src/telemetry/telemetry_parse.cpp
         src/telemetry/CsvTelemSource.cpp
         src/state/state_update.cpp

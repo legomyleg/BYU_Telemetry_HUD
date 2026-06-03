@@ -17,7 +17,7 @@ inline constexpr ColorPalette COLOR_PALETTE = WARMER_SPACE_PALETTE_1;
 inline constexpr float STAGES_HEIGHT_RATIO = 0.25f;
 inline constexpr float SENSORS_HEIGHT_RATIO = 0.5f - STAGES_HEIGHT_RATIO;
 inline constexpr float BOTTOM_PANELS_HEIGHT_RATIO = 1.0f - (SENSORS_HEIGHT_RATIO + STAGES_HEIGHT_RATIO);
-inline constexpr float GRAPH_WIDTH_RATIO = 0.5f;
+inline constexpr float GRAPH_WIDTH_RATIO = 1.0f;
 
 inline constexpr int GRAPH_ALT_HEIGHT_M = 10000;
 inline constexpr int ALT_BAR_HEIGHT_FT = 30000;
