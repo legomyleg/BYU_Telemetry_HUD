@@ -43,9 +43,9 @@ void DrawTelemetryBox(const HudApp &app) {
     float uk = 0;
     WrittenText ukText = {"TBD Value", {roundedStr(uk)}};
 
-    DrawFieldsInBox(app.hudFont, spsBox, spsText, app.colors, TELEM_SUBHEADER_SIZE, TELEM_READOUT_TEXT_SIZE, 10.0f);
-    DrawFieldsInBox(app.hudFont, pdBox, pdText, app.colors, TELEM_SUBHEADER_SIZE, TELEM_READOUT_TEXT_SIZE, 10.0f);
-    DrawFieldsInBox(app.hudFont, ukBox, ukText, app.colors, TELEM_SUBHEADER_SIZE, TELEM_READOUT_TEXT_SIZE, 10.0f);
+    DrawFieldsWithSubheaders(app.hudFont, spsBox, spsText, app.colors, TELEM_SUBHEADER_SIZE, TELEM_READOUT_TEXT_SIZE, 10.0f);
+    DrawFieldsWithSubheaders(app.hudFont, pdBox, pdText, app.colors, TELEM_SUBHEADER_SIZE, TELEM_READOUT_TEXT_SIZE, 10.0f);
+    DrawFieldsWithSubheaders(app.hudFont, ukBox, ukText, app.colors, TELEM_SUBHEADER_SIZE, TELEM_READOUT_TEXT_SIZE, 10.0f);
     
     // RUNTIME?
 }
