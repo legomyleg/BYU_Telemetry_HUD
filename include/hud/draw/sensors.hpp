@@ -19,15 +19,15 @@ inline void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &col
     Rectangle attitude = {box.x + (margin*2) + textBoxWidth, textBoxY, textBoxWidth, textBoxHeight};
     Rectangle altitude = {box.x + margin*3 + textBoxWidth*2, textBoxY, textBoxWidth, textBoxHeight};
 
-    WrittenText::input totalVel;
+    Fields::field totalVel;
     totalVel.title = "Total Velocity";
     totalVel.val = roundedStr(state.total_velocity);
 
-    WrittenText::input vertVel;
+    Fields::field vertVel;
     vertVel.title = "Vertical Velocity";
     vertVel.val = roundedStr(state.vertical_velocity_mps, 0);
 
-    WrittenText velocities = {
+    Fields velocities = {
         {totalVel, vertVel}
     };
 

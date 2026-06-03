@@ -10,13 +10,13 @@ using std::format, std::string;
 
 inline constexpr float OPTICAL_OFFSET = 2.0f;
 
-struct WrittenText {
-    struct input {
+struct Fields {
+    struct field {
         string title;
         string val;
     };
 
-    vector<input> lines;
+    vector<field> fields;
 };
 
 inline string roundedStr(float val, int precision=2) {
@@ -67,11 +67,11 @@ inline void DrawTextCenteredAtXVertical(Font font, const char* text, Rectangle r
     DrawTextPro(font, text, position, Vector2{0,0}, -90.0f, fontSize, TEXT_SPACING, color);
 }
 
-inline void DrawFieldsInBox(Font font, float fontSize, Rectangle& box, WrittenText &text, const ColorPalette &colors) {
+inline void DrawFieldsInBox(Font font, float fontSize, Rectangle& box, Fields &text, const ColorPalette &colors) {
     DrawRectangleRoundedLines(box, BOX_ROUNDNESS, 8, colors.screenDividerColor);
 
-    const int num_gaps = text.lines.size() + 1;
-    const float total_gap_len = box.height - text.lines.size();
+    const int num_gaps = text.fields.size() + 1;
+    const float total_gap_len = box.height - text.fields.size();
     const float gap_size = total_gap_len / (float)num_gaps;
 
     float margin_to_side = 10.0f;
@@ -83,7 +83,7 @@ inline void DrawFieldsInBox(Font font, float fontSize, Rectangle& box, WrittenTe
     };
     float y_pos = box.y + gap_size;
 
-    for (const auto &line : text.lines) {
+    for (const auto &line : text.fields) {
         Vector2 pos_title = {x_pos_title, y_pos};
         DrawTextEx(font, line.title.c_str(), pos_title, fontSize, TEXT_SPACING, colors.headerTextColor);
 
@@ -94,15 +94,16 @@ inline void DrawFieldsInBox(Font font, float fontSize, Rectangle& box, WrittenTe
     }
 }
 
-inline void DrawFieldsWithSubheaders(Font font, Rectangle& box, WrittenText &text, const ColorPalette &colors, float sh_size, float ro_size, float gapSize) {
+inline void DrawFieldsWithSubheaders(Font font, Rectangle& box, Fields::field text, const ColorPalette &colors, float sh_size, float ro_size, float gapSize) {
     DrawRectangleRoundedLines(box, BOX_ROUNDNESS, 8, colors.screenDividerColor);
     DrawTextCenteredToTop(font, text.title.c_str(), box, sh_size, colors.headerTextColor, FB_TITLE_MARGIN_TOP);
 
-
     float centeredX = (box.x + box.width) / 2.0f;
     Vector2 nextPos = {centeredX, box.y + sh_size + (2.0f*FB_TITLE_MARGIN_BOT)};
-    for (const auto & line : text.lines) {
-        DrawTextCenteredAtY(font, line.c_str(), box, ro_size, colors.textColor, nextPos.y);
-        nextPos.y += ro_size + gapSize;
-    }
+    DrawTextCenteredAtY(font, text.val.c_str(), box, ro_size, colors.textColor, nextPos.y);
+
+    // for (const auto & line : text.fields) {
+    //     DrawTextCenteredAtY(font, line.c_str(), box, ro_size, colors.textColor, nextPos.y);
+    //     nextPos.y += ro_size + gapSize;
+    // }
 }

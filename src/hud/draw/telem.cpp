@@ -34,14 +34,14 @@ void DrawTelemetryBox(const HudApp &app) {
 
     // SAMPLES RECEIVED PER SECOND
     float sps = app.telemetry.samples_per_sec;
-    WrittenText spsText = {"SAMPLES PER SECOND", {roundedStr(sps)}};
+    Fields::field spsText = {"SAMPLES PER SECOND", roundedStr(sps)};
 
     // PACKETS DROPPED
     float pd = app.telemetry.packets_dropped;
-    WrittenText pdText = {"PACKETS DROPPED", {roundedStr(pd)}};
+    Fields::field pdText = {"PACKETS DROPPED", roundedStr(pd)};
 
     float uk = 0;
-    WrittenText ukText = {"TBD Value", {roundedStr(uk)}};
+    Fields::field ukText = {"TBD Value", roundedStr(uk)};
 
     DrawFieldsWithSubheaders(app.hudFont, spsBox, spsText, app.colors, TELEM_SUBHEADER_SIZE, TELEM_READOUT_TEXT_SIZE, 10.0f);
     DrawFieldsWithSubheaders(app.hudFont, pdBox, pdText, app.colors, TELEM_SUBHEADER_SIZE, TELEM_READOUT_TEXT_SIZE, 10.0f);
