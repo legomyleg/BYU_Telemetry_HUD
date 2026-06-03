@@ -1,3 +1,4 @@
+#include <cmath>
 #include <state/detection/stage_detect.hpp>
 #include <raylib.h>
 #include <state/state_update.hpp>
@@ -36,7 +37,7 @@ void update_vertical_velocity(float da, float dt_s, float &vert_velocity) {
     vert_velocity = da / dt_s;
 }
 
-void update_velocity(SensorData &s, float dt_s, Vector3 &velocity, Biases &biases) {
+void update_velocity(SensorData &s, float dt_s, RocketState& state, Biases &biases) {
     float ax_use, ay_use, az_use;
 
     float total_accel = sqrt(s.hgx*s.hgx + s.hgy*s.hgy + s.hgz*s.hgz);
@@ -48,12 +49,22 @@ void update_velocity(SensorData &s, float dt_s, Vector3 &velocity, Biases &biase
     } else {
         ax_use = s.ax - biases.accel.x;
         ay_use = s.ay - biases.accel.y;
-        az_use = s.az - biases.accel.z - 9.81;
+        az_use = s.az - biases.accel.z;
     }
 
-    velocity.x = ax_use * dt_s;
-    velocity.y = ay_use * dt_s;
-    velocity.z = az_use * dt_s;
+    float dvx = ax_use * dt_s;
+    float dvy = ay_use * dt_s;
+    float dvz = az_use * dt_s;
+
+    state.velocity.x += dvx;
+    state.velocity.y += dvy;
+    state.velocity.z += dvz;
+
+    state.total_velocity = sqrtf(
+            state.velocity.x * state.velocity.x + 
+            state.velocity.y * state.velocity.y +
+            state.velocity.z * state.velocity.z
+            );
 }
 
 void update_orientation(const SensorData sample, const float dt_s, Quaternion &orientation, Biases &biases) {
@@ -110,7 +121,7 @@ void UpdateState(HudApp &app, SampleQueue &samples, TelemetrySource &tsrc) {
             da_m = data.altM - app.state.ASL_altitude;
 
             update_orientation(data, dt_s, app.state.orientation, app.state.biases);
-            update_velocity(data, dt_s, app.state.velocity, app.state.biases);
+            update_velocity(data, dt_s, app.state, app.state.biases);
             update_vertical_velocity(da_m, dt_s, app.state.vertical_velocity_mps);
             update_samples_per_sec(dt_s, app.telemetry.samples_per_sec);
 

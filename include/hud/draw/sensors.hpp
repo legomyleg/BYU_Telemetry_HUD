@@ -21,11 +21,11 @@ inline void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &col
 
     Fields::field totalVel;
     totalVel.title = "Total Velocity";
-    totalVel.val = roundedStr(state.total_velocity);
+    totalVel.val = roundedStr(state.total_velocity) + " mps";
 
     Fields::field vertVel;
     vertVel.title = "Vertical Velocity";
-    vertVel.val = roundedStr(state.vertical_velocity_mps, 0);
+    vertVel.val = roundedStr(state.sample_buffer.avg_vert_vel_mps(1'000'000), 0) + " mps";
 
     Fields velocities = {
         {totalVel, vertVel}
@@ -49,7 +49,7 @@ inline void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &col
     // string altAGL = "Altitude AGL: " + roundedStr(state.AGL_altitude);
     // WrittenText altText = {"ALTITUDE", {altASL, altAGL}};
 
-    DrawFieldsInBox(font, BOX_HEADER_SIZE, velocity, velocities, colors);
+    DrawFieldsInBox(font, READOUT_TEXT_SIZE, velocity, velocities, colors);
     // DrawFieldsInBox(font, BOX_HEADER_SIZE, attitude, attText, colors);
     // DrawFieldsInBox(font, BOX_HEADER_SIZE, altitude, altText, colors);
 }

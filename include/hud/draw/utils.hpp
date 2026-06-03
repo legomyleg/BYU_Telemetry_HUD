@@ -71,7 +71,7 @@ inline void DrawFieldsInBox(Font font, float fontSize, Rectangle& box, Fields &t
     DrawRectangleRoundedLines(box, BOX_ROUNDNESS, 8, colors.screenDividerColor);
 
     const int num_gaps = text.fields.size() + 1;
-    const float total_gap_len = box.height - text.fields.size();
+    const float total_gap_len = box.height - (text.fields.size() * fontSize);
     const float gap_size = total_gap_len / (float)num_gaps;
 
     float margin_to_side = 10.0f;
@@ -90,7 +90,7 @@ inline void DrawFieldsInBox(Font font, float fontSize, Rectangle& box, Fields &t
         Vector2 pos_val = {calc_x_pos_side(line.val), y_pos};
         DrawTextEx(font, line.val.c_str(), pos_val, fontSize, TEXT_SPACING, colors.textColor);
 
-        y_pos += gap_size;
+        y_pos += gap_size + fontSize;
     }
 }
 

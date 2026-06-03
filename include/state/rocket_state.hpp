@@ -75,9 +75,9 @@ struct RocketState {
 
     Biases biases;
 
-    Vector3 acceleration;
+    Vector3 acceleration{};
     float total_acceleration = 0;
-    Vector3 velocity;
+    Vector3 velocity{};
     float total_velocity = 0;
     float vertical_velocity_mps = 0;
     Vector3 position;
