@@ -69,8 +69,9 @@ constexpr StageInfo STAGES[] = {
 struct RocketState {
     Quaternion orientation = QuaternionIdentity();
     EulerAngles attitude;
-    float altitude = 0;
     float ground_altitude = 0;
+    float ASL_altitude = 0;
+    float AGL_altitude = 0;
 
     Biases biases;
 
@@ -103,12 +104,6 @@ struct RocketState {
     uint64_t time_in_stage() {
         return sample_buffer.get_most_recent().t_us - stage_start_us;
     }
-
-    float altAGL() const {
-        return altitude - ground_altitude;
-    }
-
-
 
     RocketState(uint64_t buffer_size) : sample_buffer(buffer_size) {}
 };

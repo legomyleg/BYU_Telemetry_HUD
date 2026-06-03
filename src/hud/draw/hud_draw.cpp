@@ -174,7 +174,7 @@ void DrawGraphBox(Font font, const HudBox &box, const ColorPalette &colors, cons
 
     DrawRectangleRounded(box, BOX_ROUNDNESS, 8, colors.panelColor);
     DrawRectangleRoundedLines(box, BOX_ROUNDNESS, 8, colors.panelBorderColor);
-    DrawTextCenteredToTop(font, "GRAPH", box, BOX_HEADER_SIZE, colors.headerTextColor, 10.0f);
+    DrawTextCenteredToTop(font, "TRAJECTORY", box, BOX_HEADER_SIZE, colors.headerTextColor, 10.0f);
 
     Vector2 cornerPoint = {box.x + margin, box.y + (box.height - margin)};
     Vector2 yAxisEndpoint = {cornerPoint.x, box.y + margin};
@@ -231,7 +231,7 @@ void DrawHud(const HudApp &app){
         return;
     }
 
-    DrawSceneBox(app.layout.scene, app.sceneTarget, app.camera, app.rocket, app.colors, app.state.altAGL(), app.hudFont);
+    DrawSceneBox(app.layout.scene, app.sceneTarget, app.camera, app.rocket, app.colors, app.state.AGL_altitude, app.hudFont);
     DrawCameraFeedBox(app.hudFont, app.layout.cameraFeed, app.colors);
     DrawDivider(app.layout.scene.height, app.layout.scene.width, app.layout.screenHeight, app.colors);
     DrawBackground(app.layout.panelBackground, app.colors);

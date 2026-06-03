@@ -14,4 +14,4 @@ void update_velocity(SensorData &s, float dt_s, Vector3 &velocity);
 
 void update_orientation(const SensorData sample, const float dt_s, Quaternion& orientation);
 
-void UpdateState(HudApp& app, SampleBuffer& samples, TelemetrySource &tsrc);
+void UpdateState(HudApp& app, SampleQueue& samples, TelemetrySource &tsrc);

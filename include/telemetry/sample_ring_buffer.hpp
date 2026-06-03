@@ -214,6 +214,9 @@ public:
     }
 
     int percent_full() const {
+
+        if (empty()) return 0;
+
         auto t = front().t_us - back().t_us;
         float p = (float)t / (float)_bufdur;
         return static_cast<int>(p * 100.f);

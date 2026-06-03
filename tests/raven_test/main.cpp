@@ -12,7 +12,7 @@ int main() {
     std::string path = "/Users/pearsonmorris/Developer/BYU_HUD_Developement/BYU_Telemetry_HUD/data/test_data/new_test_data.csv";
     auto src = CsvTelemSource(33333, path);
 
-    RunHud(&src, 2'000'000, true);
+    RunHud(&src, 1'000'000);
 
     LOG_TRACE("Exiting main.cpp");
 }

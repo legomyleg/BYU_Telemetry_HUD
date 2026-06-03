@@ -4,7 +4,7 @@
 
 using std::queue;
 
-class SampleBuffer {
+class SampleQueue {
 private:
     queue<SensorData> rows;
 

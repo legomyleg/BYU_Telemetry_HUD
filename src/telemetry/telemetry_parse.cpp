@@ -49,8 +49,8 @@ SensorData parseLine(const string& line) {
     return data;
 }
 
-SampleBuffer get_data(const string& file_path) {
-    SampleBuffer data;
+SampleQueue get_data(const string& file_path) {
+    SampleQueue data;
     ifstream inFile(file_path);
     string line;
     if (!inFile.is_open()) {

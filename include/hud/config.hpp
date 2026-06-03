@@ -10,6 +10,7 @@ inline constexpr float SCENE_WIDTH_RATIO = 0.5f;
 inline constexpr int SCENE_RENDER_SCALE = 2;
 inline constexpr float TEXT_SPACING = 2.0f;
 inline constexpr float BOX_ROUNDNESS = 0.08f;
+
 inline constexpr ColorPalette COLOR_PALETTE = WARMER_SPACE_PALETTE_1;
 // inline constexpr ColorPalette COLOR_PALETTE = MISSION_CONTROL_PALETTE;
 

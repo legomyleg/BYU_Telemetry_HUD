@@ -29,7 +29,7 @@ void RunHud(TelemetrySource *data_src, uint64_t buffer_size, bool no_calibrate) 
                 continue;
             }
 
-            UpdateState(app, app.sample_buffer, *data_src);
+            UpdateState(app, app.sample_queue, *data_src);
             if (app.state.stage != FlightStage::Calibrating) {
                 UpdateShader(app.camera, app.shader, app.light);
             }

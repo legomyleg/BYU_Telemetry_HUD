@@ -1,3 +1,4 @@
+#include <state/detection/stage_detect.hpp>
 #include <raylib.h>
 #include <state/state_update.hpp>
 #include <hud/hud_app.hpp>
@@ -19,8 +20,11 @@ void ReadSamples(HudApp &app, TelemetrySource &tsrc) {
         if (!line.empty()) {
             try {
                 SensorData sample = parseLine(line);
-                app.sample_buffer.push(sample);
+                if (app.state.stage != FlightStage::Calibrating) {
+                    app.sample_queue.push(sample);
+                }
                 app.state.sample_buffer.add_sample(sample);
+
             } catch (...) {
                 continue;
             }
@@ -77,15 +81,14 @@ void update_samples_per_sec(float dt_s, float &samples_per_sec) {
     samples_per_sec = 1.0f / dt_s;
 }
 
-void UpdateState(HudApp &app, SampleBuffer &samples, TelemetrySource &tsrc) {
+void UpdateState(HudApp &app, SampleQueue &samples, TelemetrySource &tsrc) {
+
+    static bool runtime_initialized = false;
 
     ReadSamples(app, tsrc);
+    StageDetect::update(app.state);
 
-    if (!app.state.sample_buffer.duration_full()) {
-        return;
-    } else if (app.state.stage == FlightStage::Calibrating) {
-
-    }
+    if (app.state.stage == FlightStage::Calibrating) return;
 
     float dt_s;
     float da_m;
@@ -96,13 +99,15 @@ void UpdateState(HudApp &app, SampleBuffer &samples, TelemetrySource &tsrc) {
         if (app.last_measured_time == 0) {
             app.state.latest_sample = data;
             app.last_measured_time = data.t_us;
-            app.state.altitude = data.altM;
+            app.state.ASL_altitude = data.altM;
+            app.state.AGL_altitude = data.altM - app.state.ground_altitude;
             continue;
         }
 
         if (data.t_us > app.last_measured_time) {
+
             dt_s = (data.t_us - app.last_measured_time) / 1000000.0f;
-            da_m = data.altM - app.state.altitude;
+            da_m = data.altM - app.state.ASL_altitude;
 
             update_orientation(data, dt_s, app.state.orientation, app.state.biases);
             update_velocity(data, dt_s, app.state.velocity, app.state.biases);
@@ -110,10 +115,14 @@ void UpdateState(HudApp &app, SampleBuffer &samples, TelemetrySource &tsrc) {
             update_samples_per_sec(dt_s, app.telemetry.samples_per_sec);
 
         }
-        app.state.latest_sample = data;
-        app.state.altitude = data.altM;
+
+
+        app.state.ASL_altitude = data.altM;
+        app.state.AGL_altitude = data.altM - app.state.ground_altitude;
+
+        app.measuredAlts.push_back({app.state.AGL_altitude, app.last_measured_time/1000000.0f});
         app.last_measured_time = data.t_us;
-        app.measuredAlts.push_back({app.state.altAGL(), app.last_measured_time/1000000.0f});
+        app.state.latest_sample = data;
     }
 
     app.rocket.transform = QuaternionToMatrix(app.state.orientation);

@@ -29,7 +29,7 @@ struct HudApp {
     Camera3D camera;
     RenderTexture2D sceneTarget;
     HudLayout layout;
-    SampleBuffer sample_buffer;
+    SampleQueue sample_queue;
     uint64_t last_measured_time;
     RocketState state;
     TelemetryStats telemetry;

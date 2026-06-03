@@ -9,12 +9,13 @@ float get_mag(Vector3 v) {
 }
 
 void handle_calib(RocketState& state) {
-    if (state.sample_buffer.duration_full()) {
+    if (!state.sample_buffer.duration_full()) {
         return;
     }
 
     state.biases.accel = state.sample_buffer.avg_accel_all();
     state.biases.gyro = state.sample_buffer.avg_gyro_all();
+    state.ground_altitude = state.sample_buffer.avg_alt_m_all();
 
     state.transition_to(FlightStage::Pad);
 }
@@ -60,7 +61,7 @@ void StageDetect::update(RocketState& state) {
     switch (state.stage) {
         case FlightStage::Calibrating: 
             handle_calib(state);
-        
+            break;
         case FlightStage::Pad:
             handle_pad(state);
             break;
