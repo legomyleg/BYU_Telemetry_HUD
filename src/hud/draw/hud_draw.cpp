@@ -41,14 +41,14 @@ struct Bar {
         return startPos.y - (altM * pixelsPerM);
     }
 
-    void writeSideTextAt(Font font, string text, float size, float altM) {
+    void writeSideTextAt(Font font, string text, float size, float altM, bool reached) {
         Vector2 textSize = MeasureTextEx(font, text.c_str(), size, TEXT_SPACING);
         Vector2 position = {
                 startPos.x - halfBarWidth - 5.0f - textSize.x,
                 getYPos(altM) - (textSize.y / 2.0f)
         };
 
-        Color color = currentAlt > altM ? GREEN : WHITE;
+        Color color = reached ? GREEN : WHITE;
         DrawTextEx(font, text.c_str(), position, size, TEXT_SPACING, color);
     }
 
@@ -60,10 +60,18 @@ struct Bar {
 
     void draw(Font font, float barTextSize) {
         drawBar();
-        writeSideTextAt(font, ALT_BAR_TOP_HEIGHT_TEXT, barTextSize, (ALT_BAR_HEIGHT_FT * FT2M));
-        for (const auto &ms : MILESTONES) {
+
+        if (currentAlt >= (ALT_BAR_HEIGHT_FT * FT2M)) BAR_TOP.reached = true;
+
+        writeSideTextAt(font, ALT_BAR_TOP_HEIGHT_TEXT, barTextSize, (ALT_BAR_HEIGHT_FT * FT2M), BAR_TOP.reached);
+        for (int i=0; i < MILESTONES.size(); i++) {
+            auto ms = MILESTONES.at(i);
             drawMark(ms.altitude_m);
-            writeSideTextAt(font, ms.name, barTextSize, ms.altitude_m);
+
+            if (currentAlt >= ms.altitude_m) ms.reached = true;
+
+            writeSideTextAt(font, ms.name, barTextSize, ms.altitude_m, ms.reached);
+            bool reached = false;
         }
 
         DrawCircle(startPos.x, getYPos(currentAlt), 4, RED);

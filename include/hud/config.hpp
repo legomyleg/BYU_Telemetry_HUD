@@ -14,7 +14,7 @@ inline constexpr float BOX_ROUNDNESS = 0.08f;
 inline constexpr ColorPalette COLOR_PALETTE = WARMER_SPACE_PALETTE_1;
 // inline constexpr ColorPalette COLOR_PALETTE = MISSION_CONTROL_PALETTE;
 
-inline constexpr float STAGES_HEIGHT_RATIO = 0.25f;
+inline constexpr float STAGES_HEIGHT_RATIO = 0.20f;
 inline constexpr float SENSORS_HEIGHT_RATIO = 0.5f - STAGES_HEIGHT_RATIO;
 inline constexpr float BOTTOM_PANELS_HEIGHT_RATIO = 1.0f - (SENSORS_HEIGHT_RATIO + STAGES_HEIGHT_RATIO);
 inline constexpr float GRAPH_WIDTH_RATIO = 1.0f;
