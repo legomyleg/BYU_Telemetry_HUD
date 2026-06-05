@@ -50,8 +50,9 @@ void handle_apogee(RocketState& state) {
 }
 
 void handle_descent(RocketState& state) {
-    auto vert_vel = state.sample_buffer.avg_vert_vel_mps(ONE_SECOND);
-    if (vert_vel < 2.0f) {
+    auto vert_vel = state.sample_buffer.avg_vert_vel_mps(TWO_SECOND);
+    constexpr uint64_t four_minutes = 240'000'000;
+    if (vert_vel < 1.0f && state.time_in_stage() > four_minutes) {
         state.transition_to(FlightStage::Recovery);
     }
 }

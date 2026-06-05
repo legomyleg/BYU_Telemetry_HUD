@@ -39,7 +39,7 @@ inline void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &col
     altAGL.val = roundedStr(state.AGL_altitude, 0) + " m";
 
     Fields alts = {
-        {altASL, altAGL}
+        {altAGL, altASL}
     };
 
             // string velXyz = "X: " + roundedStr(state.velocity.x) +
