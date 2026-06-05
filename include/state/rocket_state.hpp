@@ -83,6 +83,9 @@ struct RocketState {
     Vector3 position;
     FlightStage stage = FlightStage::Calibrating;
 
+    float samples_per_sec = 0;
+    int packets_dropped = 0;
+
     SensorData latest_sample{};
     SampleRingBuffer sample_buffer;
 

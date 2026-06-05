@@ -11,12 +11,17 @@ inline void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &col
     DrawRectangleRoundedLines(box, BOX_ROUNDNESS, 8, colors.panelBorderColor);
     DrawTextCenteredToTop(font, "SENSOR DATA", box, BOX_HEADER_SIZE, colors.headerTextColor, margin);
 
-    float textBoxHeight = box.height - BOX_HEADER_SIZE - (margin * 3.0f);
+    float textBoxHeight = (box.height - BOX_HEADER_SIZE - (margin * 4.0f)) / 2.0f;
     float textBoxWidth = (box.width - (margin * 3.0f)) / 2.0f;
-    float textBoxY = box.y + BOX_HEADER_SIZE + margin*2.0f;
+    float topY = box.y + BOX_HEADER_SIZE + margin*2.0f;
+    float botY = topY + textBoxHeight + margin;
+    float leftX = box.x + margin;
+    float rightX = leftX + textBoxWidth + margin;
 
-    Rectangle velocity = {box.x + margin, textBoxY, textBoxWidth, textBoxHeight};
-    Rectangle altitude = {box.x + margin*2 + textBoxWidth, textBoxY, textBoxWidth, textBoxHeight};
+    Rectangle velocityBox = {leftX, topY, textBoxWidth, textBoxHeight};
+    Rectangle altitudeBox = {leftX, botY, textBoxWidth, textBoxHeight};
+    Rectangle samplesPerSecBox = {rightX, topY, textBoxWidth, textBoxHeight};
+    Rectangle packetsDroppedBox = {rightX, botY, textBoxWidth, textBoxHeight};
 
     Fields::field totalVel;
     totalVel.title = "Total Velocity";
@@ -42,6 +47,22 @@ inline void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &col
         {altAGL, altASL}
     };
 
+    Fields::field samplesPerSec;
+    samplesPerSec.title = "Received Samples /s";
+    samplesPerSec.val = roundedStr(state.samples_per_sec, 1);
+
+    Fields sps = {
+        {samplesPerSec}
+    };
+
+    Fields::field packets_dropped;
+    packets_dropped.title = "Packets Dropped";
+    packets_dropped.val = "";
+
+    Fields pd = {
+        {packets_dropped}
+    };
+
             // string velXyz = "X: " + roundedStr(state.velocity.x) +
             //         " Y: " + roundedStr(state.velocity.y) +
             //         " Z: " + roundedStr(state.velocity.z);
@@ -60,7 +81,8 @@ inline void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &col
     // string altAGL = "Altitude AGL: " + roundedStr(state.AGL_altitude);
     // WrittenText altText = {"ALTITUDE", {altASL, altAGL}};
 
-    DrawFieldsInBox(font, READOUT_TEXT_SIZE, velocity, velocities, colors);
-    // DrawFieldsInBox(font, BOX_HEADER_SIZE, attitude, attText, colors);
-    DrawFieldsInBox(font, READOUT_TEXT_SIZE, altitude, alts, colors);
+    DrawFieldsInBox(font, READOUT_TEXT_SIZE, velocityBox, velocities, colors);
+    DrawFieldsInBox(font, READOUT_TEXT_SIZE, altitudeBox, alts, colors);
+    DrawFieldsInBox(font, READOUT_TEXT_SIZE, samplesPerSecBox, sps, colors);
+    DrawFieldsInBox(font, READOUT_TEXT_SIZE, packetsDroppedBox, pd, colors);
 }

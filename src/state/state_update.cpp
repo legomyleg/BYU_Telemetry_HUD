@@ -123,7 +123,7 @@ void UpdateState(HudApp &app, SampleQueue &samples, TelemetrySource &tsrc) {
             update_orientation(data, dt_s, app.state.orientation, app.state.biases);
             update_velocity(data, dt_s, app.state, app.state.biases);
             update_vertical_velocity(da_m, dt_s, app.state.vertical_velocity_mps);
-            update_samples_per_sec(dt_s, app.telemetry.samples_per_sec);
+            update_samples_per_sec(dt_s, app.state.samples_per_sec);
 
         }
 
