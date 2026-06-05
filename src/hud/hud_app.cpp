@@ -55,7 +55,7 @@ HudApp SetupHudApp(uint64_t buffer_size) {
     app.camera.position = {0.0f, 5.0f, 10.0f};
     app.camera.target = {0.0f, 0.0f, 0.0f};
     app.camera.up         = {0.0f, 1.0f, 0.0f};
-    app.camera.fovy       = 45.0f;
+    app.camera.fovy       = 7.0f;
     app.camera.projection = CAMERA_PERSPECTIVE;
 
     int sceneWidth = screenWidth * SCENE_WIDTH_RATIO;

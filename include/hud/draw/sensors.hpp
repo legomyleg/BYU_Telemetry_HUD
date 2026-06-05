@@ -11,13 +11,12 @@ inline void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &col
     DrawRectangleRoundedLines(box, BOX_ROUNDNESS, 8, colors.panelBorderColor);
     DrawTextCenteredToTop(font, "SENSOR DATA", box, BOX_HEADER_SIZE, colors.headerTextColor, margin);
 
-    float textBoxHeight = box.height - BOX_HEADER_SIZE - (margin * 3);
-    float textBoxWidth = (box.width - (margin * 4)) / 3.0f;
-    float textBoxY = box.y + BOX_HEADER_SIZE + margin*2;
+    float textBoxHeight = box.height - BOX_HEADER_SIZE - (margin * 3.0f);
+    float textBoxWidth = (box.width - (margin * 3.0f)) / 2.0f;
+    float textBoxY = box.y + BOX_HEADER_SIZE + margin*2.0f;
 
     Rectangle velocity = {box.x + margin, textBoxY, textBoxWidth, textBoxHeight};
-    Rectangle attitude = {box.x + (margin*2) + textBoxWidth, textBoxY, textBoxWidth, textBoxHeight};
-    Rectangle altitude = {box.x + margin*3 + textBoxWidth*2, textBoxY, textBoxWidth, textBoxHeight};
+    Rectangle altitude = {box.x + margin*2 + textBoxWidth, textBoxY, textBoxWidth, textBoxHeight};
 
     Fields::field totalVel;
     totalVel.title = "Total Velocity";
@@ -29,6 +28,18 @@ inline void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &col
 
     Fields velocities = {
         {totalVel, vertVel}
+    };
+
+    Fields::field altASL{};
+    altASL.title = "Alt ASL";
+    altASL.val = roundedStr(state.ASL_altitude, 0) + " m";
+    
+    Fields::field altAGL{};
+    altAGL.title = "Alt AGL";
+    altAGL.val = roundedStr(state.AGL_altitude, 0) + " m";
+
+    Fields alts = {
+        {altASL, altAGL}
     };
 
             // string velXyz = "X: " + roundedStr(state.velocity.x) +
@@ -51,5 +62,5 @@ inline void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &col
 
     DrawFieldsInBox(font, READOUT_TEXT_SIZE, velocity, velocities, colors);
     // DrawFieldsInBox(font, BOX_HEADER_SIZE, attitude, attText, colors);
-    // DrawFieldsInBox(font, BOX_HEADER_SIZE, altitude, altText, colors);
+    DrawFieldsInBox(font, READOUT_TEXT_SIZE, altitude, alts, colors);
 }

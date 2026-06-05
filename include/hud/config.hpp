@@ -4,7 +4,7 @@
 
 using std::string;
 
-inline const char* MODEL_PATH = "resources/models/rocket.glb";
+inline const char* MODEL_PATH = "resources/models/new_model.glb";
 inline constexpr int TARGET_FPS = 60;
 inline constexpr float SCENE_WIDTH_RATIO = 0.5f;
 inline constexpr int SCENE_RENDER_SCALE = 2;
@@ -31,7 +31,7 @@ inline constexpr float FT2M = 0.3048;
 inline constexpr float ALT_BAR_TEXT_SIZE = 10.0f;
 inline constexpr float BOX_HEADER_SIZE = 17.0f;
 inline constexpr float SUBHEADER_TEXT_SIZE = 12.0f;
-inline constexpr float READOUT_TEXT_SIZE = 12.0f;
+inline constexpr float READOUT_TEXT_SIZE = 18.0f;
 inline constexpr float GRAPH_AXIS_TEXT_SIZE = 10.0f;
 inline constexpr float STAGE_INDICATOR_TEXT_SIZE = 15.0f;
 inline constexpr float SCREEN_HIJACK_TEXT_SIZE = 60.0f;
