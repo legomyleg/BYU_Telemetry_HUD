@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 #include <state/detection/stage_detect.hpp>
 #include <raylib.h>
 #include <state/state_update.hpp>
@@ -134,6 +135,10 @@ void UpdateState(HudApp &app, SampleQueue &samples, TelemetrySource &tsrc) {
         app.measuredAlts.push_back({app.state.AGL_altitude, app.last_measured_time/1000000.0f});
         app.last_measured_time = data.t_us;
         app.state.latest_sample = data;
+
+        // DEBUGGING
+        std::cout << "Sample no. " << data.t_us / 20'000 << "\n";
+        // DEBUGGING
     }
 
     app.rocket.transform = QuaternionToMatrix(app.state.orientation);

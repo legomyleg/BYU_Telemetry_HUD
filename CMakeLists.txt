@@ -28,6 +28,7 @@ add_executable(static_test
         src/telemetry/telemetry_parse.cpp
         src/telemetry/CsvTelemSource.cpp
         src/state/state_update.cpp
+        src/state/detection/stage_detect.cpp
         src/logging/logger.cpp
 )
 

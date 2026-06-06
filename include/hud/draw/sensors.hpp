@@ -37,11 +37,11 @@ inline void DrawSensorsBox(Font font, const HudBox &box, const ColorPalette &col
 
     Fields::field altASL{};
     altASL.title = "Alt ASL";
-    altASL.val = roundedStr(state.ASL_altitude, 0) + " m";
+    altASL.val = roundedStr(state.ASL_altitude * M2FT, 0) + " ft";
     
     Fields::field altAGL{};
     altAGL.title = "Alt AGL";
-    altAGL.val = roundedStr(state.AGL_altitude, 0) + " m";
+    altAGL.val = roundedStr(state.AGL_altitude * M2FT, 0) + " ft";
 
     Fields alts = {
         {altAGL, altASL}

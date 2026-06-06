@@ -71,7 +71,6 @@ struct Bar {
             if (currentAlt >= ms.altitude_m) ms.reached = true;
 
             writeSideTextAt(font, ms.name, barTextSize, ms.altitude_m, ms.reached);
-            bool reached = false;
         }
 
         DrawCircle(startPos.x, getYPos(currentAlt), 4, RED);

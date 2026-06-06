@@ -2,7 +2,20 @@
 #include "hud/config.hpp"
 #include <string>
 #include <vector>
+#include <chrono>
 using std::string, std::vector;
+
+// DEBUG
+using std::chrono::system_clock;
+using std::chrono::time_point_cast;
+using std::chrono::seconds;
+
+#include <iostream>
+using std::cout;
+
+#include <format>
+using std::format;
+// DEBUG
 
 // The following are milestones that will be represented by the altitude bar
 

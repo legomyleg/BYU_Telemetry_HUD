@@ -51,8 +51,14 @@ void handle_apogee(RocketState& state) {
 
 void handle_descent(RocketState& state) {
     auto vert_vel = state.sample_buffer.avg_vert_vel_mps(TWO_SECOND);
+    auto gyro_accel = state.sample_buffer.avg_gyro(HALF_SECOND);
+    float mag_gyro = sqrtf(
+            gyro_accel.x * gyro_accel.x + 
+            gyro_accel.y * gyro_accel.y + 
+            gyro_accel.z * gyro_accel.z
+            );
     constexpr uint64_t four_minutes = 240'000'000;
-    if (vert_vel < 1.0f && state.time_in_stage() > four_minutes) {
+    if (vert_vel < 1.0f && mag_gyro < 2.0 && state.time_in_stage() > 240'000'000) {
         state.transition_to(FlightStage::Recovery);
     }
 }
