@@ -1,7 +1,12 @@
 #pragma once
 
 #include <cstdint>
+#include <string_view>
+#include <termios.h>
 using std::uint64_t;
+
+inline constexpr std::string_view PORT_NAME = "/dev/cu.usbmodemN32G45x1";
+inline constexpr speed_t BAUD_RATE = 115200;
 
 inline constexpr int SAMPLE_RATE = 60;
 inline constexpr int EXPECTED_FLIGHT_TIME_S = 300;

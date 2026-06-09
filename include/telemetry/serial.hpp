@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string_view>
 #include <telemetry/telem_source.hpp>
 #include <fcntl.h>
 #include <termios.h>
@@ -22,7 +23,7 @@ private:
     int fd = -1;
 
 public:
-    SerialPort(const string& port_name, speed_t baud_rate = B9600);
+    SerialPort(const std::string_view& port_name, speed_t baud_rate = B9600);
 
     ~SerialPort();
 

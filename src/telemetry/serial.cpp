@@ -1,20 +1,22 @@
+#include <string_view>
 #include <telemetry/serial.hpp>
 
-SerialPort::SerialPort(const string& port_name, speed_t baud_rate) {
-    fd = open(port_name.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
+SerialPort::SerialPort(const std::string_view& port_name, speed_t baud_rate) {
+    std::string port_n(port_name);
+    fd = open(std::string(port_name).c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
 
     while (fd < 0) {
-        cout << "Waiting for connection to serial port " << port_name;
+        cout << "Waiting for connection to serial port " << port_n;
         cout.flush();
         sleep_for(milliseconds(250));
 
-        cout << "\r\033[K" << "Waiting for connection to serial port " << port_name << " .";
+        cout << "\r\033[K" << "Waiting for connection to serial port " << port_n << " .";
         cout.flush();
         sleep_for(milliseconds(250));
-        cout << "\r\033[K" << "Waiting for connection to serial port " << port_name << " . .";
+        cout << "\r\033[K" << "Waiting for connection to serial port " << port_n << " . .";
         cout.flush();
         sleep_for(milliseconds(250));
-        cout << "\r\033[K" << "Waiting for connection to serial port " + port_name + " . . .";
+        cout << "\r\033[K" << "Waiting for connection to serial port " + port_n + " . . .";
         cout.flush();
         sleep_for(milliseconds(250));
         cout << "\r\033[K";

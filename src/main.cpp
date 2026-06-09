@@ -6,7 +6,7 @@
 #include <telemetry/telemetry_config.hpp>
 
 int main() {
-    SerialPort serial = SerialPort("/dev/cu.usbserial-0001", 57600);
+    SerialPort serial = SerialPort(PORT_NAME, BAUD_RATE);
 
     uint64_t buf_size = 2'000'000;
     RunHud(&serial, buf_size);

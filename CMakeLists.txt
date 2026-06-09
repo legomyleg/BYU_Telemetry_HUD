@@ -5,6 +5,7 @@ project(BYU_Telemetry_HUD VERSION 1.0 LANGUAGES CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(raylib CONFIG REQUIRED)
+find_package(OpenCV REQUIRED)
 
 add_executable(BYU_Telemetry_HUD
         src/main.cpp
@@ -55,10 +56,10 @@ target_compile_definitions(raven_test PRIVATE ROOT_DIR="${CMAKE_CURRENT_SOURCE_D
 
 target_compile_definitions(raven_test PRIVATE ENABLE_LOGGING=1)
 
-target_include_directories(BYU_Telemetry_HUD PRIVATE include)
-target_include_directories(static_test PRIVATE include)
-target_include_directories(raven_test PRIVATE include)
+target_include_directories(BYU_Telemetry_HUD PRIVATE include ${OpenCV_INCLUDE_DIRS})
+target_include_directories(static_test PRIVATE include ${OpenCV_INCLUDE_DIRS})
+target_include_directories(raven_test PRIVATE include ${OpenCV_INCLUDE_DIRS})
 
-target_link_libraries(BYU_Telemetry_HUD PRIVATE raylib)
-target_link_libraries(static_test PRIVATE raylib)
-target_link_libraries(raven_test PRIVATE raylib)
+target_link_libraries(BYU_Telemetry_HUD PRIVATE raylib ${OpenCV_LIBS})
+target_link_libraries(static_test PRIVATE raylib ${OpenCV_LIBS})
+target_link_libraries(raven_test PRIVATE raylib ${OpenCV_LIBS})
