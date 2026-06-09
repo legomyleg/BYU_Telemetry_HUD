@@ -29,5 +29,3 @@ extern vector<float SensorData::*> float_fields;
 SensorData parseLine(const string& line);
 
 SampleQueue get_data(const string& file_path);
-
-void wait(int milli);

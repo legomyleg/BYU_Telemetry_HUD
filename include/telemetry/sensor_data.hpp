@@ -1,12 +1,6 @@
 #pragma once
 #include <cstdint>
 
-struct MagnetometerSample {
-    float mx;
-    float my;
-    float mz;
-};
-
 struct SensorData {
   uint64_t t_us;
 

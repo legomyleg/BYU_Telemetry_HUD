@@ -64,7 +64,3 @@ SampleQueue get_data(const string& file_path) {
 
     return data;
 }
-
-void wait(int milli) {
-    sleep_for(milliseconds(milli));
-}
