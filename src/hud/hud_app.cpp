@@ -1,12 +1,17 @@
+#include "raylib.h"
 #define RLIGHTS_IMPLEMENTATION
 #include <hud/hud_app.hpp>
 #include <raymath.h>
+#include <telemetry/feed/rtsp_receiver.hpp>
 
 void HudApp::unload() {
     UnloadFont(hudFont);
     UnloadModel(rocket);
     UnloadShader(shader);
     UnloadRenderTexture(sceneTarget);
+    if (camera_feed_enabled) {
+        UnloadTexture(frame_texture);
+    }
 }
 
 void orient_model(HudApp &app) {
@@ -67,7 +72,7 @@ HudApp SetupHudApp(uint64_t buffer_size) {
     app.layout = MakeHudLayout(screenWidth, screenHeight);
 
     app.state.orientation = QuaternionIdentity();
-    orient_model(app);
+    // orient_model(app);
     app.last_measured_time = 0;
 
     return app;

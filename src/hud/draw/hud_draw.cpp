@@ -124,12 +124,23 @@ void DrawSceneBox(const HudBox &box,
     DrawAltBar(box, currentAltAGL, font);
 }
 
-void DrawCameraFeedBox(Font font, const HudBox &box, const ColorPalette &colors) {
-    DrawRectangleRec(box, {0,0,0,255});
+void DrawCameraFeedBox(const HudApp& app) {
 
-    DrawTextCenteredEx(font, "CAMERA FEED", box, SCREEN_HIJACK_TEXT_SIZE, colors.headerTextColor);
+    if (app.camera_feed_enabled && app.curr_frame.empty()) {
+        DrawRectangleRec(app.layout.cameraFeed, {0,0,0,255});
+        DrawTextCenteredEx(app.hudFont, "WAITING ON FEED", app.layout.cameraFeed, SCREEN_HIJACK_TEXT_SIZE, app.colors.headerTextColor);
+        return;
+    } else if (app.camera_feed_enabled) {
+        const auto& texture = app.frame_texture;
+        const Rectangle source = {0, 0, (float)texture.width, (float)texture.height};
+        const Rectangle& dest = app.layout.cameraFeed;
+        DrawTexturePro(texture, source, dest, {0, 0}, 0, WHITE);
+    } else {
+        DrawRectangleRec(app.layout.cameraFeed, {0,0,0,255});
+        DrawTextCenteredEx(app.hudFont, "CAMERA FEED", app.layout.cameraFeed, SCREEN_HIJACK_TEXT_SIZE, app.colors.headerTextColor);
+        return;
+    }
 }
-
 void DrawStageIndicator(Vector2 center, float radius, const StageInfo &si, bool active, Font font) {
     Color color = active ? GREEN : GRAY;
 
@@ -238,7 +249,7 @@ void DrawHud(const HudApp &app){
     }
 
     DrawSceneBox(app.layout.scene, app.sceneTarget, app.camera, app.rocket, app.colors, app.state.AGL_altitude, app.hudFont);
-    DrawCameraFeedBox(app.hudFont, app.layout.cameraFeed, app.colors);
+    DrawCameraFeedBox(app);
     DrawDivider(app.layout.scene.height, app.layout.scene.width, app.layout.screenHeight, app.colors);
     DrawBackground(app.layout.panelBackground, app.colors);
     DrawStagesBox(app.hudFont, app.layout.stages, app.colors, app.state.stage);

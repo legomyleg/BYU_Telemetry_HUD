@@ -5,6 +5,8 @@
 #include <hud/hud_app.hpp>
 #include <hud/colors.hpp>
 #include <format>
+#include <iostream>
+#include <opencv2/imgproc.hpp>
 #include <string>
 using std::format, std::string;
 
@@ -106,4 +108,66 @@ inline void DrawFieldsWithSubheaders(Font font, Rectangle& box, Fields::field te
     //     DrawTextCenteredAtY(font, line.c_str(), box, ro_size, colors.textColor, nextPos.y);
     //     nextPos.y += ro_size + gapSize;
     // }
+}
+
+inline void UpdateTextureFromMat(const cv::Mat& sourceMat, Texture2D& dest_texture) {
+    if (sourceMat.empty()) {
+        std::cerr << "Cannot load texture from sourceMat, Mat is empty\n";
+        return;
+    }
+
+    cv::Mat rgbMat;
+    if (dest_texture.id == 0) {
+        PixelFormat format;
+        if (sourceMat.channels() == 3) {
+            cv::cvtColor(sourceMat, rgbMat, cv::COLOR_BGR2RGB);
+            format = PIXELFORMAT_UNCOMPRESSED_R8G8B8;
+        } else if (sourceMat.channels() == 4) {
+            cv::cvtColor(sourceMat, rgbMat, cv::COLOR_BGR2RGBA);
+            format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+        } else if (sourceMat.channels() == 1) {
+            rgbMat = sourceMat;
+            format = PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
+        } else {
+            std::cerr << "unsupported Mat channel count.\n";
+            return;
+        }
+
+        Image raylibImage = { 0 };
+        raylibImage.data = rgbMat.data;
+        raylibImage.format = format;
+        raylibImage.width = rgbMat.cols;
+        raylibImage.height = rgbMat.rows;
+        raylibImage.mipmaps = 1;
+        dest_texture = LoadTextureFromImage(raylibImage);
+    } else {
+        cv::cvtColor(sourceMat, rgbMat, cv::COLOR_BGR2RGB);
+        UpdateTexture(dest_texture, rgbMat.data);
+    }
+    //
+    // PixelFormat format;
+    // if (sourceMat.channels() == 3) {
+    //     cv::cvtColor(sourceMat, rgbMat, cv::COLOR_BGR2RGB);
+    //     format = PIXELFORMAT_UNCOMPRESSED_R8G8B8;
+    // } else if (sourceMat.channels() == 4) {
+    //     cv::cvtColor(sourceMat, rgbMat, cv::COLOR_BGR2RGBA);
+    //     format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    // } else if (sourceMat.channels() == 1) {
+    //     rgbMat = sourceMat;
+    //     format = PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
+    // } else {
+    //     std::cerr << "unsupported Mat channel count.\n";
+    //     return;
+    // }
+    //
+    // Image raylibImage = { 0 };
+    // raylibImage.data = rgbMat.data;
+    // raylibImage.format = format;
+    // raylibImage.width = rgbMat.cols;
+    // raylibImage.height = rgbMat.rows;
+    // raylibImage.mipmaps = 1;
+    //
+    // UpdateTexture
+    // Texture2D texture = LoadTextureFromImage(raylibImage);
+    // return texture;
 }

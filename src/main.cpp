@@ -8,6 +8,6 @@
 int main() {
     SerialPort serial = SerialPort(PORT_NAME, BAUD_RATE);
 
-    uint64_t buf_size = 2'000'000;
-    RunHud(&serial, buf_size);
+    uint64_t buf_size = 3'000'000;
+    RunHud(&serial, buf_size, false, true);
 }

@@ -8,6 +8,9 @@ using std::uint64_t;
 inline constexpr std::string_view PORT_NAME = "/dev/cu.usbmodemN32G45x1";
 inline constexpr speed_t BAUD_RATE = 115200;
 
+inline constexpr std::string_view RTSP_URL = "rtsp://192.168.144.25:8554/main.264";
+// inline constexpr std::string_view RTSP_URL = "rtsp://localhost:8554/mystream";
+
 inline constexpr int SAMPLE_RATE = 60;
 inline constexpr int EXPECTED_FLIGHT_TIME_S = 300;
 inline constexpr int EXPECTED_MAX_ALT_M = 10000;

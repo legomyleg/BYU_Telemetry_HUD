@@ -1,5 +1,4 @@
 #pragma once
-#include "state/calibration.hpp"
 #include <cassert>
 #include <cstddef>
 #include <telemetry/telemetry_config.hpp>
@@ -8,12 +7,19 @@
 #include <array>
 #include <logging/logger.hpp>
 #include <format>
+#include <iostream>
 #include <cstdint>
 
 using std::array;
 
 using std::uint64_t;
 using microsec = uint64_t;
+
+enum class SampleStatus {
+    Ok,
+    TimeDrop,
+    TimeStall
+};
 
 class SampleRingBuffer {
 private:
@@ -35,6 +41,10 @@ private:
     const SensorData& back() const {
         assert(!empty());
         return _buffer[tail];
+    }
+
+    bool sane_dt(uint64_t dt) {
+        return dt > 0 && dt < 100'000;
     }
 
 public:
@@ -71,9 +81,24 @@ public:
         return current_dur + SAMPLE_TOLERANCE_US >= _bufdur;
     }
 
+    SampleStatus classify_sample(const SensorData& sample) const {
+        if (empty()) return SampleStatus::Ok;
+        if (sample.t_us < front().t_us) return SampleStatus::TimeDrop;
+        if (sample.t_us == front().t_us) return SampleStatus::TimeStall;
+
+        return SampleStatus::Ok;
+    }
+
     void add_sample(const SensorData& data) {
 
-        assert(sample_count == 0 || data.t_us > front().t_us);
+        assert(classify_sample(data) == SampleStatus::Ok);
+
+        if (empty()) {
+            _buffer[head] = data;
+            head = (head + 1) % BUFFER_CAPACITY;
+            sample_count++;
+            return;
+        }
 
         if (sample_count == BUFFER_CAPACITY) {
             // Add error handling here
@@ -125,6 +150,41 @@ public:
 
     Vector3 avg_accel_all() const {
         return avg_accel(_bufdur);
+    }
+
+    Vector3 avg_hg_accel(microsec duration) const {
+
+        if (sample_count == 0) return {0,0,0};
+
+        size_t i = (head + BUFFER_CAPACITY - 1) % BUFFER_CAPACITY;
+        auto newest_time = _buffer[i].t_us;
+
+        float sum_x = 0;
+        float sum_y = 0;
+        float sum_z = 0;
+        size_t total = 0;
+
+        for (size_t n=0; n < sample_count; n++) {
+            const auto &data = _buffer[i];
+
+            if (newest_time - data.t_us > duration) break;
+
+            sum_x += data.hgx;
+            sum_y += data.hgy;
+            sum_z += data.hgz;
+
+            total++;
+
+            i = (BUFFER_CAPACITY + i - 1) % BUFFER_CAPACITY;
+        }
+
+        if (total == 0) return {0,0,0};
+
+        return {sum_x / total, sum_y / total, sum_z / total};
+    }
+
+    Vector3 avg_hg_accel_all() {
+        return avg_hg_accel(_bufdur);
     }
 
     Vector3 avg_gyro(microsec duration) const {

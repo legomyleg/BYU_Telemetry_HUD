@@ -1,3 +1,4 @@
+#include "state/calibration.hpp"
 #include "state/rocket_state.hpp"
 #include "telemetry/sample_ring_buffer.hpp"
 #include "telemetry/telemetry_config.hpp"
@@ -14,7 +15,13 @@ void handle_calib(RocketState& state) {
     }
 
     state.biases.accel = state.sample_buffer.avg_accel_all();
+    state.biases.accel = calibrate_sensor_vector(state.biases.accel);
+    state.biases.accel.z -= 9.81f;
     state.biases.gyro = state.sample_buffer.avg_gyro_all();
+    state.biases.gyro = calibrate_sensor_vector(state.biases.gyro);
+    state.biases.hgaccel = state.sample_buffer.avg_hg_accel_all();
+    state.biases.hgaccel = calibrate_sensor_vector(state.biases.hgaccel);
+    state.biases.hgaccel.z -= 9.81f;
     state.ground_altitude = state.sample_buffer.avg_alt_m_all();
 
     state.transition_to(FlightStage::Pad);

@@ -48,4 +48,8 @@ public:
     bool empty() const {
         return rows.empty();
     }
+
+    void clear() {
+        rows = queue<SensorData>();
+    }
 };

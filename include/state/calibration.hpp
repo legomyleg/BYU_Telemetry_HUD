@@ -4,6 +4,7 @@
 struct Biases {
     Vector3 accel = {0,0,0};
     Vector3 gyro = {0,0,0};
+    Vector3 hgaccel = {0, 0, 0};
 };
 
 /*
