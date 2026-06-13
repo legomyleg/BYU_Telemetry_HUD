@@ -1,3 +1,6 @@
+#include <cstdint>
+#include <sstream>
+#include <stdexcept>
 #include <telemetry/CsvTelemSource.hpp>
 #include <iostream>
 #include <string>
@@ -6,13 +9,34 @@ using std::getline, std::string;
 using std::chrono::microseconds, std::chrono::steady_clock;
 using std::chrono::duration_cast;
 
-CsvTelemSource::CsvTelemSource(int interval_us, string filePath)
-    : _interval(interval_us), _file(filePath), accumulated_time(steady_clock::now())
+uint64_t get_t_us(string line) {
+    std::stringstream ss(line);
+    string t_str;
+    getline(ss, t_str, ',');
+    uint64_t t;
+    try {
+        t = std::stoull(t_str);
+    } catch (...) {
+        throw std::runtime_error("Could not parse string " + t_str);
+    }
+    return t;
+}
+
+CsvTelemSource::CsvTelemSource(uint64_t interval_us, string filePath, uint64_t start_point_us)
+    : _interval(interval_us), _file(filePath), accumulated_time(steady_clock::now()), _start_point(start_point_us)
 {
     if (!_file.is_open()) {
         std::cerr << "Error: could not open file at \"" + filePath + "\"" << std::endl;
     }
     has_read = false;
+    
+    bool start_reached = false;
+    string line;
+    while (!start_reached) {
+        getline(_file, line);
+        auto t = get_t_us(line);
+        start_reached = t < _start_point.count() ? false : true;
+    }
 }
 
 int CsvTelemSource::num_lines() {
@@ -30,8 +54,8 @@ string CsvTelemSource::read_available() {
         has_read = true;
     }
 
-    int nlines = num_lines();
     string lines;
+    int nlines = num_lines();
 
     int lines_read = 0;
     string temp_str;

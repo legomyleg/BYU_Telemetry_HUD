@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include <telemetry/telem_source.hpp>
 #include <chrono>
 #include <fstream>
@@ -10,6 +11,7 @@ using std::chrono::duration_cast;
 class CsvTelemSource : public TelemetrySource {
 private:
     microseconds _interval;
+    microseconds _start_point;
     ifstream _file;
 
     bool has_read;
@@ -20,7 +22,7 @@ private:
     int num_lines();
 
 public:
-    CsvTelemSource(int interval_us, string filePath);
+    CsvTelemSource(uint64_t interval_us, string filePath, uint64_t start_point_us=0);
     string read_available() override;
     ~CsvTelemSource();
 };
