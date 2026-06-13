@@ -1,5 +1,7 @@
 #pragma once
+#include "logging/data_logger.hpp"
 #include <opencv2/opencv.hpp>
+#include <optional>
 #include <raylib.h>
 #include <hud/rlights.h>
 #include <hud/hud_layout.hpp>
@@ -27,6 +29,8 @@ enum class UpdateMode {
 };
 
 struct HudApp {
+    std::optional<DataLogger> logger;
+
     Font hudFont;
     ColorPalette colors = COLOR_PALETTE;
     Model rocket;

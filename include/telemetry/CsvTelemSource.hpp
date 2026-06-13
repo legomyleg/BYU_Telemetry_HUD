@@ -10,19 +10,21 @@ using std::chrono::duration_cast;
 
 class CsvTelemSource : public TelemetrySource {
 private:
-    microseconds _interval;
     microseconds _start_point;
+    steady_clock::time_point _playback_start;
+
+    string _pending_line;
+    uint64_t _pending_t_us = 0;
+
     ifstream _file;
 
-    bool has_read;
+    bool _has_started;
+    bool _has_pending;
 
-    steady_clock::time_point first_read;
-    steady_clock::time_point accumulated_time;
-
-    int num_lines();
+    bool load_next_line();
 
 public:
-    CsvTelemSource(uint64_t interval_us, string filePath, uint64_t start_point_us=0);
+    CsvTelemSource(string filePath, uint64_t start_point_us=0);
     string read_available() override;
     ~CsvTelemSource();
 };

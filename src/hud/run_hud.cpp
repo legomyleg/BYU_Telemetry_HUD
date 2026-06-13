@@ -13,6 +13,10 @@ void RunHud(TelemetrySource *data_src, uint64_t buffer_size, bool no_calibrate, 
 
     auto app = SetupHudApp(buffer_size);
 
+    if (DATA_LOGGING) {
+        app.logger.emplace();
+    }
+
     RtspFeed* p_feed = nullptr;
     if (get_feed) {
         app.camera_feed_enabled = true;

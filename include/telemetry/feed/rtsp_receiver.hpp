@@ -1,3 +1,4 @@
+#pragma once
 #include "telemetry/telemetry_config.hpp"
 #include <atomic>
 #include <functional>

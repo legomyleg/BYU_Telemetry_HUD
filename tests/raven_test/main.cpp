@@ -10,7 +10,7 @@ int main() {
     LOG_TRACE("Entering main.cpp");
 
     std::string path = "/Users/pearsonmorris/Developer/BYU_HUD_Developement/BYU_Telemetry_HUD/data/test_data/new_test_data.csv";
-    auto src = CsvTelemSource(33333, path);
+    auto src = CsvTelemSource(path);
 
     RunHud(&src, 1'000'000, false, true);
 

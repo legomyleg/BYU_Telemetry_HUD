@@ -1,3 +1,4 @@
+#pragma once
 #include "raylib.h"
 #include "state/calibration.hpp"
 #include "telemetry/sensor_data.hpp"

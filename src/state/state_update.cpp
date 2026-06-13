@@ -1,3 +1,4 @@
+#include "logging/data_logger.hpp"
 #include "telemetry/mavlink_sensor_parser.hpp"
 #include <state/forconverter.hpp>
 #include "telemetry/sample_buffer.hpp"
@@ -20,31 +21,36 @@
 #include <vector>
 using std::string;
 
-void ReadSamples(HudApp &app, TelemetrySource &tsrc) {
-    app.data_buffer += tsrc.read_available();
-
-    size_t newline_pos;
-    while((newline_pos = app.data_buffer.find("\n")) != string::npos) {
-        string line = app.data_buffer.substr(0, newline_pos);
-        app.data_buffer.erase(0, newline_pos + 1);
-
-        if (!line.empty()) {
-            try {
-                SensorData sample = parseLine(line);
-                if (app.state.stage != FlightStage::Calibrating) {
-                    app.sample_queue.push(sample);
-                }
-                app.state.sample_buffer.add_sample(sample);
-
-            } catch (...) {
-                continue;
-            }
-        }
-    }
-}
+// void ReadSamples(HudApp &app, TelemetrySource &tsrc) {
+//     app.data_buffer += tsrc.read_available();
+//
+//     size_t newline_pos;
+//     while((newline_pos = app.data_buffer.find("\n")) != string::npos) {
+//         string line = app.data_buffer.substr(0, newline_pos);
+//         app.data_buffer.erase(0, newline_pos + 1);
+//
+//         if (!line.empty()) {
+//             try {
+//                 SensorData sample = parseLine(line);
+//
+//                 if (app.state.stage != FlightStage::Calibrating) {
+//                     app.sample_queue.push(sample);
+//                 }
+//                 app.state.sample_buffer.add_sample(sample);
+//
+//             } catch (...) {
+//                 continue;
+//             }
+//         }
+//     }
+// }
 
 
 void handle_sample(HudApp& app, const SensorData& sample) {
+
+    if (app.logger) {
+        app.logger->LogSensorData(sample);
+    }
 
     if (app.updateMode == UpdateMode::ReSync) {
         if (sample.t_us < app.resyncArray.back().t_us) {
@@ -100,15 +106,15 @@ void handle_sample(HudApp& app, const SensorData& sample) {
     }
 }
 
-// void ReadSamples(HudApp& app, TelemetrySource& tsrc) {
-//     static MavlinkSensorParser parser;
-//     std::string bytes = tsrc.read_available();
-//     std::vector<SensorData> samples = parser.push_bytes(bytes);
-//
-//     for (const SensorData& sample : samples) {
-//         handle_sample(app, sample);
-//     }
-// }
+void ReadSamples(HudApp& app, TelemetrySource& tsrc) {
+    static MavlinkSensorParser parser;
+    std::string bytes = tsrc.read_available();
+    std::vector<SensorData> samples = parser.push_bytes(bytes);
+
+    for (const SensorData& sample : samples) {
+        handle_sample(app, sample);
+    }
+}
 
 void update_vertical_velocity(float da, float dt_s, float &vert_velocity) {
     vert_velocity = da / dt_s;

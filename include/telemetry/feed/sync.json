@@ -1,0 +1,9 @@
+{
+    "video_path": "",
+    "telem_data_path": "",
+    
+    "video_sync_time_sec": 0,
+    "telem_sync_time_sec": 0,
+
+    "replay_start_before_sync": 3.0
+}

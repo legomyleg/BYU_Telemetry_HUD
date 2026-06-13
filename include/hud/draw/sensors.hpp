@@ -1,3 +1,4 @@
+#pragma once
 #include "hud/config.hpp"
 #include <raylib.h>
 #include <hud/hud_app.hpp>

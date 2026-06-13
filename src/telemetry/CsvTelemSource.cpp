@@ -22,46 +22,45 @@ uint64_t get_t_us(string line) {
     return t;
 }
 
-CsvTelemSource::CsvTelemSource(uint64_t interval_us, string filePath, uint64_t start_point_us)
-    : _interval(interval_us), _file(filePath), accumulated_time(steady_clock::now()), _start_point(start_point_us)
+CsvTelemSource::CsvTelemSource(string filePath, uint64_t start_point_us)
+    : _file(filePath), _start_point(start_point_us)
 {
     if (!_file.is_open()) {
         std::cerr << "Error: could not open file at \"" + filePath + "\"" << std::endl;
     }
-    has_read = false;
+
+    _has_started = false;
     
-    bool start_reached = false;
-    string line;
-    while (!start_reached) {
-        getline(_file, line);
-        auto t = get_t_us(line);
-        start_reached = t < _start_point.count() ? false : true;
-    }
+    // Skip samples before start_point_us
+    while (load_next_line() && _pending_t_us < _start_point.count()) {}
 }
 
-int CsvTelemSource::num_lines() {
-    auto elapsed = steady_clock::now() - accumulated_time;
-    microseconds delta = duration_cast<microseconds>(elapsed);
-    int num_lines = static_cast<int>(delta / _interval);
-    accumulated_time += (_interval * num_lines);
-    return num_lines;
+bool CsvTelemSource::load_next_line() {
+    if (!getline(_file, _pending_line)) {
+        _has_pending = false;
+        return false;
+    }
+
+    _pending_t_us = get_t_us(_pending_line);
+    _has_pending = true;
+    return true;
 }
 
 string CsvTelemSource::read_available() {
 
-    if (!has_read) {
-        accumulated_time = steady_clock::now();
-        has_read = true;
+    if (!_has_started) {
+        _playback_start = steady_clock::now();
+        _has_started = true;
     }
 
+    auto elapsed = duration_cast<microseconds>(steady_clock::now() - _playback_start);
+    uint64_t playback_t_us = _start_point.count() + elapsed.count();
+
     string lines;
-    int nlines = num_lines();
 
-    int lines_read = 0;
-    string temp_str;
-
-    while (lines_read++ < nlines && getline(_file, temp_str)) {
-        lines.append(temp_str).append("\n");
+    while (_has_pending && _pending_t_us <= playback_t_us) {
+        lines.append(_pending_line);
+        load_next_line();
     }
 
     return lines;
