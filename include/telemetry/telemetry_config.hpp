@@ -12,7 +12,7 @@ inline constexpr std::string_view RTSP_URL = "rtsp://192.168.144.25:8554/main.26
 // inline constexpr std::string_view RTSP_URL = "rtsp://localhost:8554/mystream";
 
 inline constexpr int SAMPLE_RATE = 60;
-inline constexpr int EXPECTED_FLIGHT_TIME_S = 300;
+inline constexpr int EXPECTED_FLIGHT_TIME_S = 360;
 inline constexpr int EXPECTED_MAX_ALT_M = 10000;
 
 inline constexpr uint64_t HALF_SECOND = 500000;

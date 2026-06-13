@@ -1,4 +1,5 @@
 #include "telemetry/mavlink_sensor_parser.hpp"
+#include <state/forconverter.hpp>
 #include "telemetry/sample_buffer.hpp"
 #include "telemetry/sensor_data.hpp"
 #include <format>
@@ -17,29 +18,30 @@
 #include <telemetry/telemetry_parse.hpp>
 #include <cassert>
 #include <vector>
+using std::string;
 
-// void ReadSamples(HudApp &app, TelemetrySource &tsrc) {
-//     app.data_buffer += tsrc.read_available();
-//
-//     size_t newline_pos;
-//     while((newline_pos = app.data_buffer.find("\n")) != string::npos) {
-//         string line = app.data_buffer.substr(0, newline_pos);
-//         app.data_buffer.erase(0, newline_pos + 1);
-//
-//         if (!line.empty()) {
-//             try {
-//                 SensorData sample = parseLine(line);
-//                 if (app.state.stage != FlightStage::Calibrating) {
-//                     app.sample_queue.push(sample);
-//                 }
-//                 app.state.sample_buffer.add_sample(sample);
-//
-//             } catch (...) {
-//                 continue;
-//             }
-//         }
-//     }
-// }
+void ReadSamples(HudApp &app, TelemetrySource &tsrc) {
+    app.data_buffer += tsrc.read_available();
+
+    size_t newline_pos;
+    while((newline_pos = app.data_buffer.find("\n")) != string::npos) {
+        string line = app.data_buffer.substr(0, newline_pos);
+        app.data_buffer.erase(0, newline_pos + 1);
+
+        if (!line.empty()) {
+            try {
+                SensorData sample = parseLine(line);
+                if (app.state.stage != FlightStage::Calibrating) {
+                    app.sample_queue.push(sample);
+                }
+                app.state.sample_buffer.add_sample(sample);
+
+            } catch (...) {
+                continue;
+            }
+        }
+    }
+}
 
 
 void handle_sample(HudApp& app, const SensorData& sample) {
@@ -98,15 +100,15 @@ void handle_sample(HudApp& app, const SensorData& sample) {
     }
 }
 
-void ReadSamples(HudApp& app, TelemetrySource& tsrc) {
-    static MavlinkSensorParser parser;
-    std::string bytes = tsrc.read_available();
-    std::vector<SensorData> samples = parser.push_bytes(bytes);
-
-    for (const SensorData& sample : samples) {
-        handle_sample(app, sample);
-    }
-}
+// void ReadSamples(HudApp& app, TelemetrySource& tsrc) {
+//     static MavlinkSensorParser parser;
+//     std::string bytes = tsrc.read_available();
+//     std::vector<SensorData> samples = parser.push_bytes(bytes);
+//
+//     for (const SensorData& sample : samples) {
+//         handle_sample(app, sample);
+//     }
+// }
 
 void update_vertical_velocity(float da, float dt_s, float &vert_velocity) {
     vert_velocity = da / dt_s;
@@ -124,20 +126,19 @@ void update_velocity(SensorData &s, float dt_s, RocketState& state, Biases &bias
     if (total_accel < 100) {
         std::cout << std::format("X: {}, Y: {}, Z: {}\n", ab.x, ab.y, ab.z);
         accel_use = Vector3Subtract(ab, biases.accel);
-        std::cout << std::format("Corrected: X: {}, Y: {}, Z: {}\n", accel_use.x, accel_use.y, accel_use.z);
     } else {
         accel_use = Vector3Subtract(hgb, biases.hgaccel);
     }
 
     Vector3 accel_world = Vector3Transform(accel_use, QuaternionToMatrix(state.orientation));
     Vector3 gravity_world = {0, 0, 9.81};
-    Vector3 linear_accel_world = Vector3Subtract(accel_world, gravity_world);
+    Vector3 linear_accel_world = Vector3Subtract(gravity_world, accel_world);
 
     float dvx = linear_accel_world.x * dt_s;
     float dvy = linear_accel_world.y * dt_s;
     float dvz = linear_accel_world.z * dt_s;
 
-
+    std::cout << std::format("Corrected: X: {}, Y: {}, Z: {}\n", linear_accel_world.x, linear_accel_world.y, linear_accel_world.z);
 
     state.velocity.x += dvx;
     state.velocity.y += dvy;
@@ -170,8 +171,9 @@ void update_orientation(const SensorData& sample, const float dt_s, Quaternion &
             cos(theta / 2)
     };
 
-    // orientation = QuaternionMultiply(orientation, q);
-    orientation = QuaternionMultiply(q, orientation);
+    q = apply_body_transformation_to_render(q);
+
+    orientation = QuaternionMultiply(orientation, q);
     orientation = QuaternionNormalize(orientation);
 }
 
