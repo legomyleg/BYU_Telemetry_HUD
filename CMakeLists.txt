@@ -90,10 +90,10 @@ target_include_directories(BYU_Telemetry_HUD PRIVATE include ${OpenCV_INCLUDE_DI
 target_include_directories(static_test PRIVATE include ${OpenCV_INCLUDE_DIRS})
 target_include_directories(sensor_out PRIVATE include) 
 target_include_directories(raven_test PRIVATE include ${OpenCV_INCLUDE_DIRS})
-target_include_directories(replay PRIVATE include) 
+target_include_directories(replay PRIVATE include ${OpenCV_INCLUDE_DIRS})
 
 target_link_libraries(BYU_Telemetry_HUD PRIVATE raylib ${OpenCV_LIBS})
 target_link_libraries(static_test PRIVATE raylib ${OpenCV_LIBS})
 target_link_libraries(raven_test PRIVATE raylib ${OpenCV_LIBS})
 target_link_libraries(sensor_out PRIVATE raylib)
-target_link_libraries(replay PRIVATE raylib)
+target_link_libraries(replay PRIVATE raylib ${OpenCV_LIBS})

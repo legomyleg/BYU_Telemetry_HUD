@@ -1,5 +1,4 @@
 #pragma once
-#include "telemetry/telemetry_config.hpp"
 #include <atomic>
 #include <functional>
 #include <opencv2/opencv.hpp>
@@ -25,19 +24,46 @@ public:
             return false;
         }
 
-        output_frame = shared_frame;
+        output_frame.copyTo(shared_frame);
         has_new_frame = false;
         return true;
     }
 };
 
 void captureThreadWorker(std::string_view url, FrameBuffer& buffer, std::atomic<bool>& keep_running); 
+void videoFileThreadWorker(double start_sec, std::string_view file_path, FrameBuffer& buffer, std::atomic<bool>& keep_running); 
 
-struct RtspFeed {
-    FrameBuffer buffer;
-    std::atomic<bool> keep_running;
-    std::thread worker;
-
-    RtspFeed() : buffer(FrameBuffer{}), keep_running(true), worker(captureThreadWorker, RTSP_URL, std::ref(buffer), std::ref(keep_running)) {}
+enum class FeedType {
+    Rtsp,
+    VideoFile
 };
 
+struct CameraFeedConfig {
+    FeedType type;
+    const std::string_view source;
+    double start_sec = 0;
+};
+
+struct CameraFeed {
+    FrameBuffer buffer{};
+    std::atomic<bool> keep_running = true;
+    std::thread worker;
+
+    CameraFeed(CameraFeedConfig config) {
+        if (config.type == FeedType::Rtsp) {
+            worker = std::thread(captureThreadWorker, config.source, std::ref(buffer), std::ref(keep_running));
+        } else {
+            worker = std::thread(videoFileThreadWorker, config.start_sec, config.source, std::ref(buffer), std::ref(keep_running));
+        }
+    }
+
+    CameraFeed(const CameraFeed&) = delete;
+    CameraFeed& operator=(const CameraFeed&) = delete;
+
+    ~CameraFeed() {
+        keep_running = false;
+        if (worker.joinable()) {
+            worker.join();
+        }
+    }
+};

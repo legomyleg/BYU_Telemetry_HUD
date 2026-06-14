@@ -30,9 +30,18 @@ CsvTelemSource::CsvTelemSource(string filePath, uint64_t start_point_us)
     }
 
     _has_started = false;
-    
-    // Skip samples before start_point_us
-    while (load_next_line() && _pending_t_us < _start_point.count()) {}
+
+    string throw_away_header;
+    getline(_file, throw_away_header);
+        
+    load_next_line();
+    if (start_point_us == 0 && _has_pending) {
+        _start_point = microseconds(_pending_t_us);
+    } else {
+        while (_has_pending && _pending_t_us < _start_point.count()) {
+            load_next_line();
+        }
+    }
 }
 
 bool CsvTelemSource::load_next_line() {
@@ -59,7 +68,7 @@ string CsvTelemSource::read_available() {
     string lines;
 
     while (_has_pending && _pending_t_us <= playback_t_us) {
-        lines.append(_pending_line);
+        lines.append(_pending_line).append("\n");
         load_next_line();
     }
 

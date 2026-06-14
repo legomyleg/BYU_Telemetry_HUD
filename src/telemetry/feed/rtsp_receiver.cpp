@@ -1,3 +1,5 @@
+#include <opencv2/videoio.hpp>
+#include <string>
 #include <telemetry/feed/rtsp_receiver.hpp>
 #include <iostream>
 
@@ -25,4 +27,26 @@ void captureThreadWorker(std::string_view url, FrameBuffer& buffer, std::atomic<
         }
     }
     cap.release();
+}
+
+void videoFileThreadWorker(double start_sec, std::string_view file_path, FrameBuffer &buffer, std::atomic<bool> &keep_running) {
+    cv::VideoCapture cap(std::string(file_path), cv::CAP_FFMPEG);
+
+    if (!cap.isOpened()) {
+        std::cerr << "Could not read from video file " + std::string(file_path) + "\n";
+        keep_running = false;
+        return;
+    }
+
+    cap.set(cv::CAP_PROP_POS_MSEC, start_sec * 1000.0);
+
+    cv::Mat frame;
+    while (keep_running) {
+        if (!cap.read(frame) || frame.empty()) {
+            keep_running = false;
+            break;
+        }
+
+        buffer.update(frame);
+    }
 }

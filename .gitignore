@@ -13,6 +13,7 @@
 .vscode/
 .DS_Store
 /goals.md
+/video_reader_review.md
 
 logs/*
 /tests/build
