@@ -20,10 +20,6 @@ void RunHud(TelemetrySource *data_src, uint64_t buffer_size, bool no_calibrate, 
     }
 
     std::unique_ptr<CameraFeed> feed;
-    if (config.has_value()) {
-        app.camera_feed_enabled = true;
-        feed = std::make_unique<CameraFeed>(*config);
-    }
 
     while (!WindowShouldClose()) {
         BeginDrawing();
@@ -43,6 +39,12 @@ void RunHud(TelemetrySource *data_src, uint64_t buffer_size, bool no_calibrate, 
                 EndDrawing();
                 continue;
             }
+
+            if (initialized && feed == nullptr && config.has_value()) {
+                app.camera_feed_enabled = true;
+                feed = std::make_unique<CameraFeed>(*config);
+            }
+
             if (feed != nullptr) {
                 auto could_get_frame = feed->buffer.getLatest(app.curr_frame);
                 if (!could_get_frame) {

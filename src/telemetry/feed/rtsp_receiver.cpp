@@ -1,7 +1,9 @@
+#include <chrono>
 #include <opencv2/videoio.hpp>
 #include <string>
 #include <telemetry/feed/rtsp_receiver.hpp>
 #include <iostream>
+#include <thread>
 
 void captureThreadWorker(std::string_view url, FrameBuffer& buffer, std::atomic<bool>& keep_running) {
     setenv("OPENCV_FFMPEG_CAPTURE_OPTIONS", "rtsp_transport;tcp", 1);
@@ -40,6 +42,14 @@ void videoFileThreadWorker(double start_sec, std::string_view file_path, FrameBu
 
     cap.set(cv::CAP_PROP_POS_MSEC, start_sec * 1000.0);
 
+    double fps = cap.get(cv::CAP_PROP_FPS);
+    if (fps <= 0) {
+        fps = 30.0;
+    }
+    auto frame_delay = std::chrono::milliseconds(
+            static_cast<int>(1000.0 / fps)
+            );
+
     cv::Mat frame;
     while (keep_running) {
         if (!cap.read(frame) || frame.empty()) {
@@ -48,5 +58,6 @@ void videoFileThreadWorker(double start_sec, std::string_view file_path, FrameBu
         }
 
         buffer.update(frame);
+        std::this_thread::sleep_for(frame_delay);
     }
 }

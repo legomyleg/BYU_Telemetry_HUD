@@ -24,7 +24,7 @@ public:
             return false;
         }
 
-        output_frame.copyTo(shared_frame);
+        shared_frame.copyTo(output_frame);
         has_new_frame = false;
         return true;
     }
