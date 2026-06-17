@@ -18,3 +18,5 @@
 logs/*
 /tests/build
 /build-debug
+
+./data/logged_data/*

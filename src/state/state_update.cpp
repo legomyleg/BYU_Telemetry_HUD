@@ -9,6 +9,7 @@
 #include <state/detection/stage_detect.hpp>
 #include <raylib.h>
 #include "raymath.h"
+#include "telemetry/telemetry_config.hpp"
 #include <state/state_update.hpp>
 #include <hud/hud_app.hpp>
 #include <state/calibration.hpp>
@@ -120,6 +121,30 @@ void update_vertical_velocity(float da, float dt_s, float &vert_velocity) {
     vert_velocity = da / dt_s;
 }
 
+void update_gs(SensorData &s, RocketState &state) {
+
+    Vector3 accel_use;
+    float total_accel = sqrt(s.hgx*s.hgx + s.hgy*s.hgy + s.hgz*s.hgz);
+
+    if (total_accel < 100) {
+        accel_use = {s.ax, s.ay, s.az};
+        float accel_mag = sqrt(accel_use.x*accel_use.x + accel_use.y*accel_use.y + accel_use.z*accel_use.z);
+        state.g_force = (accel_mag / 9.80665f);
+    } else {
+        state.g_force = (total_accel / 9.80665f);
+    }
+
+}
+
+void update_attitude_roc(SensorData &s, RocketState &state) {
+    Vector3 avg_gyro = state.sample_buffer.avg_gyro(ONE_SECOND);
+    auto p = calibrate_sensor_vector(avg_gyro);
+
+    state.attitude_roc.z = p.z;
+    state.attitude_roc.y = p.y;
+    state.attitude_roc.x = p.x;
+}
+
 void update_velocity(SensorData &s, float dt_s, RocketState& state, Biases &biases) {
     Vector3 accel_use;
 
@@ -130,7 +155,6 @@ void update_velocity(SensorData &s, float dt_s, RocketState& state, Biases &bias
     float total_accel = sqrt(hgb.x*hgb.x + hgb.y*hgb.y + hgb.z*hgb.z);
 
     if (total_accel < 100) {
-        std::cout << std::format("X: {}, Y: {}, Z: {}\n", ab.x, ab.y, ab.z);
         accel_use = Vector3Subtract(ab, biases.accel);
     } else {
         accel_use = Vector3Subtract(hgb, biases.hgaccel);
@@ -143,8 +167,6 @@ void update_velocity(SensorData &s, float dt_s, RocketState& state, Biases &bias
     float dvx = linear_accel_world.x * dt_s;
     float dvy = linear_accel_world.y * dt_s;
     float dvz = linear_accel_world.z * dt_s;
-
-    std::cout << std::format("Corrected: X: {}, Y: {}, Z: {}\n", linear_accel_world.x, linear_accel_world.y, linear_accel_world.z);
 
     state.velocity.x += dvx;
     state.velocity.y += dvy;
@@ -192,7 +214,7 @@ void UpdateState(HudApp &app, SampleQueue &samples, TelemetrySource &tsrc) {
     static bool runtime_initialized = false;
 
     ReadSamples(app, tsrc);
-    StageDetect::update(app.state);
+    StageDetect::update(app.state, app);
 
     if (app.state.stage == FlightStage::Calibrating) return;
 
@@ -212,11 +234,13 @@ void UpdateState(HudApp &app, SampleQueue &samples, TelemetrySource &tsrc) {
 
         if (data.t_us > app.last_measured_time) {
 
-            dt_s = (data.t_us - app.last_measured_time) / 1000000.0f;
+            dt_s = (data.t_us - app.last_measured_time) / 1'000'000.0f;
             da_m = data.altM - app.state.ASL_altitude;
 
             update_orientation(data, dt_s, app.state.orientation, app.state.biases);
             update_velocity(data, dt_s, app.state, app.state.biases);
+            update_gs(data, app.state);
+            update_attitude_roc(data, app.state);
             update_vertical_velocity(da_m, dt_s, app.state.vertical_velocity_mps);
             update_samples_per_sec(dt_s, app.state.samples_per_sec);
 
@@ -226,7 +250,11 @@ void UpdateState(HudApp &app, SampleQueue &samples, TelemetrySource &tsrc) {
         app.state.ASL_altitude = data.altM;
         app.state.AGL_altitude = data.altM - app.state.ground_altitude;
 
-        app.measuredAlts.push_back({app.state.AGL_altitude, app.last_measured_time/1000000.0f});
+        if (app.state.stage > FlightStage::Pad) {
+            auto total_dt = data.t_us - app.state.launched_t_us;
+            app.measuredAlts.push_back({app.state.AGL_altitude, total_dt/1'000'000.0f});
+        }
+
         app.last_measured_time = data.t_us;
         app.state.latest_sample = data;
     }

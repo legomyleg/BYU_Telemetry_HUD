@@ -1,3 +1,4 @@
+#include "hud/hud_app.hpp"
 #include "state/calibration.hpp"
 #include "state/rocket_state.hpp"
 #include "telemetry/sample_ring_buffer.hpp"
@@ -27,11 +28,12 @@ void handle_calib(RocketState& state) {
     state.transition_to(FlightStage::Pad);
 }
 
-void handle_pad(RocketState& state) {
+void handle_pad(RocketState& state, HudApp& app) {
     auto accel = state.sample_buffer.avg_accel(HALF_SECOND);
     float mag = std::sqrtf(accel.x*accel.x + accel.y*accel.y + accel.z*accel.z);
     if (mag > 50.0f) {
         state.transition_to(FlightStage::Boost);
+        state.launched_t_us = app.last_measured_time;
     }
 }
 
@@ -70,14 +72,14 @@ void handle_descent(RocketState& state) {
     }
 }
 
-void StageDetect::update(RocketState& state) {
+void StageDetect::update(RocketState& state, HudApp& app) {
 
     switch (state.stage) {
         case FlightStage::Calibrating: 
             handle_calib(state);
             break;
         case FlightStage::Pad:
-            handle_pad(state);
+            handle_pad(state, app);
             break;
         case FlightStage::Boost:
             handle_boost(state);

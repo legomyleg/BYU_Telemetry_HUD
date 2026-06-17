@@ -41,6 +41,7 @@ struct HudApp {
     HudLayout layout;
     SampleQueue sample_queue;
     uint64_t last_measured_time;
+    uint64_t first_measured_time;
     RocketState state;
     TelemetryStats telemetry;
     vector<AltAtT> measuredAlts;

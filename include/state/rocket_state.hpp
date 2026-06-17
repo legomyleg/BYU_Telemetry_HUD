@@ -79,9 +79,12 @@ struct RocketState {
     float total_acceleration = 0;
     Vector3 velocity{};
     float total_velocity = 0;
+    float g_force = 0;
+    Vector3 attitude_roc{};
     float vertical_velocity_mps = 0;
     Vector3 position;
     FlightStage stage = FlightStage::Calibrating;
+    uint64_t launched_t_us = 0;
 
     float samples_per_sec = 0;
     int packets_dropped = 0;
