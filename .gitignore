@@ -19,4 +19,7 @@ logs/*
 /tests/build
 /build-debug
 
-./data/logged_data/*
+/data/logged_data/*
+/data/video_files/*
+
+/resources/models/new_model.glb

@@ -9,10 +9,10 @@
 cv::VideoCapture openRtsp(std::string_view url) {
     setenv("OPENCV_FFMPEG_CAPTURE_OPTIONS", "rtsp_transport;tcp", 1);
     return cv::VideoCapture(std::string(url), cv::CAP_FFMPEG, {
+
             cv::CAP_PROP_OPEN_TIMEOUT_MSEC, 3'000,
-            cv::CAP_PROP_READ_TIMEOUT_MSEC, 1'000,
-            cv::CAP_PROP_BUFFERSIZE, 1
-    });
+            cv::CAP_PROP_READ_TIMEOUT_MSEC, 1'000
+            });
 }
 
 void captureThreadWorker(std::string_view url, FrameBuffer& buffer, std::atomic<bool>& keep_running) {
