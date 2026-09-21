@@ -1,10 +1,13 @@
-# BYU Telemetry HUD
+<div align="center"> 
+  <h1>BYU Telemetry HUD</h1>
+</div>
 
-A C++20 desktop telemetry display for BYU Rocketry. The live application reads
-sensor samples from a serial port using a custom MAVLink 2 message, calibrates
-sensor biases and ground altitude, estimates motion and flight stage, and renders
-a fullscreen raylib HUD. An OpenCV worker receives RTSP video independently of
-the telemetry input.
+
+
+<img width="1280" height="800" alt="demo" src="https://github.com/user-attachments/assets/f380db19-fae9-44f2-901a-41af2a150ab8" />
+
+
+A live telemetry display for BYU's High Power Team, written in C++20. 
 
 The repository also contains a static HUD preview, a serial diagnostic, CSV
 playback utilities, recorded telemetry, and FAR flight-analysis data. **The CSV
@@ -36,9 +39,7 @@ configured device path is macOS-specific. There is no Windows serial backend.
 The build does not download dependencies, pin their versions, or install/package
 the application and its resources.
 
-[NEEDS MY INPUT: Which operating systems and compiler/dependency versions should
-be supported, and is distribution intended to be a source checkout or a packaged
-application?]
+**Because this application was built for a specific use, there is currently no support for non-macOS operating systems.**
 
 ### Build commands
 
