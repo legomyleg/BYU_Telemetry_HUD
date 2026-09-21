@@ -22,29 +22,29 @@
 #include <vector>
 using std::string;
 
-// void ReadSamples(HudApp &app, TelemetrySource &tsrc) {
-//     app.data_buffer += tsrc.read_available();
-//
-//     size_t newline_pos;
-//     while((newline_pos = app.data_buffer.find("\n")) != string::npos) {
-//         string line = app.data_buffer.substr(0, newline_pos);
-//         app.data_buffer.erase(0, newline_pos + 1);
-//
-//         if (!line.empty()) {
-//             try {
-//                 SensorData sample = parseLine(line);
-//
-//                 if (app.state.stage != FlightStage::Calibrating) {
-//                     app.sample_queue.push(sample);
-//                 }
-//                 app.state.sample_buffer.add_sample(sample);
-//
-//             } catch (...) {
-//                 continue;
-//             }
-//         }
-//     }
-// }
+void ReadCsvSamples(HudApp &app, TelemetrySource &tsrc) {
+    app.data_buffer += tsrc.read_available();
+
+    size_t newline_pos;
+    while((newline_pos = app.data_buffer.find("\n")) != string::npos) {
+        string line = app.data_buffer.substr(0, newline_pos);
+        app.data_buffer.erase(0, newline_pos + 1);
+
+        if (!line.empty()) {
+            try {
+                SensorData sample = parseLine(line);
+
+                if (app.state.stage != FlightStage::Calibrating) {
+                    app.sample_queue.push(sample);
+                }
+                app.state.sample_buffer.add_sample(sample);
+
+            } catch (...) {
+                continue;
+            }
+        }
+    }
+}
 
 
 void handle_sample(HudApp& app, const SensorData& sample) {
@@ -108,6 +108,11 @@ void handle_sample(HudApp& app, const SensorData& sample) {
 }
 
 void ReadSamples(HudApp& app, TelemetrySource& tsrc) {
+    # ifdef SOURCE_CSV
+        ReadCsvSamples(app, tsrc);
+        return;
+    #endif
+
     static MavlinkSensorParser parser;
     std::string bytes = tsrc.read_available();
     std::vector<SensorData> samples = parser.push_bytes(bytes);

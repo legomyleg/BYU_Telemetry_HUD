@@ -7,6 +7,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(raylib CONFIG REQUIRED)
 find_package(OpenCV REQUIRED)
 
+add_subdirectory(tests)
+
 add_executable(BYU_Telemetry_HUD
         src/main.cpp
         src/hud/run_hud.cpp
@@ -81,7 +83,7 @@ target_compile_features(replay PRIVATE cxx_std_20)
 
 target_compile_definitions(BYU_Telemetry_HUD PRIVATE ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}" DATA_LOGGING=1)
 target_compile_definitions(static_test PRIVATE ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}" DATA_LOGGING=0)
-target_compile_definitions(raven_test PRIVATE ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}" DATA_LOGGING=0)
+target_compile_definitions(raven_test PRIVATE ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}" DATA_LOGGING=0 SOURCE_CSV=1)
 target_compile_definitions(replay PRIVATE ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}" DATA_LOGGING=0)
 
 target_compile_definitions(raven_test PRIVATE ENABLE_LOGGING=1)
