@@ -1,5 +1,8 @@
 # BYU Telemetry HUD
 
+<img width="1280" height="800" alt="demo" src="https://github.com/user-attachments/assets/f380db19-fae9-44f2-901a-41af2a150ab8" />
+
+
 A C++20 desktop telemetry display for BYU Rocketry. The live application reads
 sensor samples from a serial port using a custom MAVLink 2 message, calibrates
 sensor biases and ground altitude, estimates motion and flight stage, and renders
