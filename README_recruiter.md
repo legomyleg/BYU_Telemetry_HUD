@@ -21,13 +21,50 @@
 
 ## Overview
 
-The **BYU Telemetry HUD** is a C++20 ground-station application built for BYU's High Power Team. It turns a live MAVLink telemetry stream into an operator-facing view of the rocket's state, combining sensor readouts, automatic flight-stage detection, a 3D attitude visualization, altitude history, and an RTSP camera feed in one interface.
+The **BYU Telemetry HUD** is a C++20 ground-station application built for BYU's High Power Team. Developed in roughly two months, this system includes a custom MAVLink parser, serial I/O, buffering and resynchronization, sensor calibration, motion estimation, automatic flight-stage detection, multithreaded RTSP video, data logging, and a real-time ground-station HUD built with raylib.
 
-The application is built around a custom MAVLink 2 sensor message carrying a timestamp and **16 floating-point sensor values**. Incoming data is decoded, validated, buffered, calibrated, processed into motion and altitude estimates, and rendered in real time. A separate video worker receives camera frames without putting capture and decoding work on the main rendering thread.
+## Deployment
+This is software **built for flight.** Much of its development focused on handling the realities of live telemetry: timestamp discontinuities, noisy sensor data, interrupted streams, and signal loss. IREC 2026 provided the first opportunity to test those decisions in a real flight environment—and exposed several failure modes we had not encountered on the ground.
 
-> [!IMPORTANT]
-> **TODO — Add deployment context:** Briefly describe where/when this system was flown or field-tested, what role it played, and the most meaningful verified result.  
-> Suggested material to verify and add: IREC 2026, flight altitude, telemetry rate, and what data the system successfully recovered.
+### IREC 2026
+<img width="2048" height="1152" alt="image" src="https://github.com/user-attachments/assets/180be120-328f-429c-bd6c-3cd73bb634c2" />
+
+
+The telemetry system was deployed at the 2026 International Rocket Engineering Competition aboard BYU High Power Rocketry's competition vehicle. It was responsible for receiving live sensor telemetry and video, recording incoming data, estimating vehicle state, and providing operators with a real-time ground-station display.
+
+
+Shortly after launch, the 5 GHz telemetry link was lost, leaving the ground station with only sparse data for the remainder of the flight. An SD-card reader issue discovered just hours before launch also prevented the custom flight computer from logging telemetry onboard. After recovering the rocket, we discovered that both redundant commercial flight computers had also failed to produce usable flight records. Without another source of data, we risked having no recorded apogee to submit to the competition judges.
+
+
+The ground station, however, had logged every telemetry packet it successfully received. From that sparse recording, we recovered a peak recorded altitude of approximately **27,000 ft**, providing the team's only usable apogee data and contributing to a **4th-place finish in our competition category.**
+
+
+### Lessons from Flight
+
+**Ground-station logging proved its value as an independent data path.** Although the RF link performed poorly, every packet that reached the application was recorded. When the onboard logging systems failed, those ground-station records became the team's only usable source of apogee data.
+
+Some of the biggest failures were no onboard logging and no onboard state estimation. Because the state estimation logic was being performed **on the ground,** after any loss of connection, we could not reliably determine the state of the vehicle. This was an oversight that we are going to fix in the upcoming year. 
+
+Another downfall to the current system is **lack of testability.** There are a couple builds that _allow_ testing, but they are for inspecting visuals and running it against a CSV file of data from our test flight. These are good, but they have their limits with utility. Testing the robustness of the error handling system, for example, was difficult to do in a meaningful way. Testing the accuracy of the state estimation (past what you can do by just inspecting its behavior when simulating the test flight data) was also difficult to do, and we were unsure as to how well it would work during our _actual_ flight.
+
+
+### What We're Changing
+
+IREC 2026 exposed two major architectural weaknesses: too much responsibility lived on the ground, and too little of the system could be tested deterministically before flight.
+For IREC 2027, state estimation and logging are moving onboard the vehicle so that loss of the telemetry link does not mean loss of state information or flight data. The ground station will receive both raw measurements and estimated vehicle state, while the flight computer maintains its own complete onboard record.
+We're also building the next iteration around testability. Recorded-flight replay, automated regression tests, and hardware/software-in-the-loop testing will allow failure conditions—packet loss, sensor noise, timing discontinuities, and other abnormal inputs—to be reproduced before flight rather than discovered during it.
+On the operator side, we're expanding the HUD with:
+- GPS position and map visualization
+- SIL and HIL testability
+- Kalman-filtered state estimation
+- Sensor and link-health indicators
+- Improved telemetry diagnostics
+- A geographically grounded 3D vehicle visualization
+
+The goal for IREC 2027 is to compete for the Live Telemetry / Live Video award with a system that is not only more capable, but substantially easier to validate before it reaches the launch pad.
+
+<img width="376" height="204" alt="Adobe Express - unreal_clip" src="https://github.com/user-attachments/assets/0c487111-b80f-43b5-b606-cd383210a17e" />
+
 
 ### At a glance
 
