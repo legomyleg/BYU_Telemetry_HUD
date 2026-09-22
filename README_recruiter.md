@@ -8,7 +8,6 @@
 
 <br>
 
-<!-- TODO: Replace with your best current screenshot or, preferably, a short GIF of live telemetry. -->
 <img width="1280" alt="BYU Telemetry HUD" src="https://github.com/user-attachments/assets/f380db19-fae9-44f2-901a-41af2a150ab8" />
 
 <br>
@@ -21,647 +20,272 @@
 
 ## Overview
 
-The **BYU Telemetry HUD** is a C++20 ground-station application built for BYU's High Power Team. It turns a live MAVLink telemetry stream into an operator-facing view of the rocket's state, combining sensor readouts, automatic flight-stage detection, a 3D attitude visualization, altitude history, and an RTSP camera feed in one interface.
+The **BYU Telemetry HUD** is a C++20 ground-station application built for BYU's High Power Team. Developed in roughly two months, this system includes a custom MAVLink parser, serial I/O, buffering and resynchronization, sensor calibration, motion estimation, automatic flight-stage detection, multithreaded RTSP video, data logging, and a real-time ground-station HUD built with raylib.
 
-The application is built around a custom MAVLink 2 sensor message carrying a timestamp and **16 floating-point sensor values**. Incoming data is decoded, validated, buffered, calibrated, processed into motion and altitude estimates, and rendered in real time. A separate video worker receives camera frames without putting capture and decoding work on the main rendering thread.
+## Deployment
 
-> [!IMPORTANT]
-> **TODO — Add deployment context:** Briefly describe where/when this system was flown or field-tested, what role it played, and the most meaningful verified result.  
-> Suggested material to verify and add: IREC 2026, flight altitude, telemetry rate, and what data the system successfully recovered.
-
-### At a glance
-
-| | |
-| :--- | :--- |
-| **Language** | C++20 |
-| **Purpose** | High-power rocket telemetry ground station |
-| **Telemetry protocol** | MAVLink 2, custom message ID `300` |
-| **Telemetry payload** | `uint64_t` timestamp + 16 `float` values (72 bytes) |
-| **Visualization** | raylib, 3D GLB rocket model, live instrumentation |
-| **Video** | OpenCV + RTSP, worker-thread capture |
-| **Input** | POSIX serial |
-| **Logging** | Decoded telemetry to CSV |
-| **Current platform** | macOS / POSIX serial implementation |
-
----
-
-## What It Does
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### Live Telemetry
-
-Consumes a nonblocking serial byte stream and incrementally reconstructs custom **MAVLink 2** frames.
-
-- Persistent parser handles frames split across reads
-- CRC validation before samples enter the state pipeline
-- Rejects oversized payloads and ignores unrelated message IDs
-- Tracks successful frames and parser failures internally
-- Handles telemetry timestamp discontinuities and resynchronization
-
-</td>
-<td width="50%" valign="top">
-
-### 3D Attitude Visualization
-
-Uses IMU angular-rate measurements to update a live 3D representation of the rocket.
-
-- Quaternion-based orientation integration
-- Gyroscope bias compensation
-- Sensor-to-body coordinate transformation
-- Body-to-render coordinate conversion
-- Normalized orientation updates every processed sample
-
-</td>
-</tr>
-
-<tr>
-<td width="50%" valign="top">
-
-### Automatic Flight Staging
-
-Tracks the rocket through the flight sequence without requiring the operator to manually change modes.
-
-```text
-CALIBRATING
-     ↓
-    PAD
-     ↓
-   BOOST
-     ↓
-   COAST
-     ↓
-  APOGEE
-     ↓
-  DESCENT
-     ↓
- RECOVERY
-```
-
-Transitions use rolling acceleration, altitude-rate, angular-rate, and timing conditions.
-
-</td>
-<td width="50%" valign="top">
-
-### Live Video
-
-Displays an RTSP camera stream alongside telemetry.
-
-- Capture and decoding run on a worker thread
-- Thread-safe latest-frame handoff
-- Main-thread texture upload for raylib
-- Stream open/read timeouts
-- Automatic release and reconnect after sustained failures
-- Latest-frame design prevents an accumulating video queue
-
-</td>
-</tr>
-</table>
-
-<!-- TODO: Add a 2-column screenshot/GIF section here.
-     Left: attitude visualization moving with recorded/live telemetry.
-     Right: camera + instrumentation during a test.
--->
-
----
-
-## Operator Display
-
-The HUD is designed to put the rocket's most useful live information in one place. The current interface combines a **3D rocket scene and camera feed** with flight-stage indicators, instrumentation, and altitude history.
-
-Current readouts include:
-
-| Display | Source / behavior |
-| :--- | :--- |
-| **AGL altitude** | Received altitude minus calibrated ground altitude |
-| **ASL altitude** | Received `altM` telemetry value |
-| **Vertical velocity** | Rolling two-second altitude slope |
-| **G-force** | Magnitude from the selected normal/high-G accelerometer |
-| **Roll / pitch / yaw rates** | Rolling gyroscope measurements |
-| **Flight stage** | Automatic stage detector |
-| **Altitude history** | AGL altitude plotted against time since launch |
-| **3D attitude** | Gyroscope-integrated quaternion orientation |
-| **Camera** | RTSP stream decoded through OpenCV |
-
-<!-- TODO: Add an annotated HUD screenshot here.
-     Consider numbering 4–6 important areas and explaining them in a compact legend.
--->
-
----
-
-## System Architecture
-
-```mermaid
-flowchart LR
-    subgraph Rocket["Rocket / Telemetry Source"]
-        Sensors["Sensor Package"]
-        Camera["Camera"]
-    end
-
-    subgraph Ingestion["Data Ingestion"]
-        Serial["POSIX Serial"]
-        Parser["MAVLink 2 Parser"]
-        Video["RTSP Video Worker"]
-    end
-
-    subgraph Processing["Telemetry Processing"]
-        Validate["Timestamp Validation<br>& Resynchronization"]
-        History["Rolling Sample History"]
-        Queue["Integration Queue"]
-        Calib["Calibration"]
-        Stage["Flight-Stage Detection"]
-        Estimate["Motion / Altitude<br>Processing"]
-        Logger["CSV Logger"]
-    end
-
-    subgraph Display["Ground Station"]
-        State["Rocket State"]
-        HUD["raylib HUD"]
-        Model["3D Attitude"]
-        Graph["Altitude History"]
-        Feed["Camera Texture"]
-    end
-
-    Sensors --> Serial --> Parser
-    Parser --> Logger
-    Parser --> Validate
-    Validate --> History
-    Validate --> Queue
-    History --> Calib
-    History --> Stage
-    History --> Estimate
-    Queue --> Estimate
-    Calib --> State
-    Stage --> State
-    Estimate --> State
-    State --> HUD
-    State --> Model
-    Estimate --> Graph
-    Model --> HUD
-    Graph --> HUD
-
-    Camera --> Video --> Feed --> HUD
-```
-
-The main application loop drains available telemetry, feeds bytes through a persistent MAVLink parser, records decoded samples, validates timestamps, updates rolling history, runs flight-stage detection, processes queued samples, and renders the resulting state. Camera capture and decoding are isolated on a worker thread; telemetry parsing, state processing, texture updates, and drawing currently run on the main thread.
-
-> [!NOTE]
-> **TODO — Design rationale:** Add 2–4 sentences explaining the constraints that led to this architecture and the telemetry-rate/responsiveness requirements it was designed around.
-
----
-
-## Telemetry Pipeline
-
-```text
-Serial Device
-     │
-     ▼
-Raw MAVLink Byte Stream
-     │
-     ▼
-┌─────────────────────────┐
-│ Streaming Frame Parser  │
-│ • frame synchronization │
-│ • partial-frame buffer  │
-│ • CRC validation        │
-└────────────┬────────────┘
-             │
-             ▼
-       Sensor Sample
-             │
-       ┌─────┴───────────────┐
-       │                     │
-       ▼                     ▼
-   CSV Logger        Timestamp Validation
-                             │
-                             ▼
-                   Rolling Sample History
-                      │             │
-                      ▼             ▼
-                 Calibration    Stage Detection
-                      │             │
-                      └──────┬──────┘
-                             │
-                    Integration Queue
-                             │
-                             ▼
-                    State Processing
-                             │
-                             ▼
-                       RocketState
-                             │
-                             ▼
-                           HUD
-```
-
-### Custom MAVLink message
-
-The active parser accepts a project-specific MAVLink 2 message:
-
-| Property | Value |
-| :--- | :--- |
-| **Message ID** | `300` |
-| **CRC extra** | `95` |
-| **Payload size** | 72 bytes |
-| **Timestamp** | 1 × little-endian `uint64_t` |
-| **Sensor values** | 16 × little-endian 32-bit floats |
-| **Signed MAVLink frames** | Signature trailer length accounted for; authentication is not performed |
-
-The payload maps directly into the application's `SensorData` representation:
-
-```text
-t_us
-│
-├── Normal accelerometer ── ax, ay, az
-├── Gyroscope ───────────── gx, gy, gz
-├── Magnetometer ────────── mx, my, mz
-├── IMU temperature ─────── imuTempC
-├── Barometer ───────────── baroTempC, pressPa
-├── Altitude ────────────── altM
-└── High-G accelerometer ── hgx, hgy, hgz
-```
-
-> [!NOTE]
-> **TODO — Protocol context:** Add the location of the transmitting firmware / authoritative MAVLink definition and a short explanation of why a custom message was selected.
-
----
-
-## Robust Telemetry Ingestion
-
-A flight telemetry link cannot assume perfectly ordered, uninterrupted input. The ingestion path includes several mechanisms for maintaining a usable stream when incoming data is fragmented or timing changes unexpectedly.
-
-### Frame-level handling
-
-The MAVLink parser:
-
-- Maintains incomplete data across serial reads
-- Scans for the MAVLink 2 `0xFD` start byte
-- Validates CRCs
-- Rejects oversized payloads
-- Ignores unrelated message IDs
-- Accounts for the optional MAVLink signature trailer length
-
-### Timestamp recovery
-
-Accepted samples are required to advance in time. If the source timestamp moves backward, the application enters a resynchronization path and waits for **five strictly increasing timestamps** before reseeding its sample history and processing queue.
-
-This prevents an immediate clock discontinuity from being integrated as if it were ordinary flight data.
-
-### Rolling history
-
-A bounded `SampleRingBuffer` retains recent telemetry for operations that need a time window rather than a single sample, including:
-
-- Startup calibration
-- Flight-stage detection
-- Vertical-velocity estimation
-- Rolling angular-rate readouts
-
-The current implementation caps this history at **200 samples** and at most **three seconds**.
-
-> [!NOTE]
-> **TODO — Engineering rationale:** Explain the expected telemetry rate and why the 200-sample capacity, three-second history, 40 ms calibration tolerance, and five-sample resynchronization rule were selected.
-
----
-
-## Calibration & State Processing
-
-Before entering the Pad state, the application collects a stationary telemetry window and estimates sensor offsets.
-
-### Startup calibration
-
-The calibration process:
-
-1. Averages the normal accelerometer, high-G accelerometer, and gyroscope over the retained history.
-2. Converts those measurements from the sensor frame into the rocket body frame.
-3. Removes the expected gravity contribution from the body-Z accelerometer means.
-4. Stores the gyroscope mean as its bias.
-5. Stores mean received altitude as ground altitude.
-6. Advances the state machine from **Calibrating → Pad**.
-
-The fixed sensor-to-body mapping is:
-
-```text
-sensor (x, y, z)  →  body (z, -y, x)
-```
-
-### Attitude
-
-Orientation is represented as a quaternion. For each processed sample, the application:
-
-1. Maps gyroscope data into body coordinates.
-2. Subtracts the calibrated gyro bias.
-3. Converts angular rate × `dt` into an axis-angle quaternion increment.
-4. Converts that increment into rendering coordinates.
-5. Multiplies it into the current orientation.
-6. Normalizes the resulting quaternion.
-
-The current estimator is intentionally simple: **attitude is gyro-integrated and does not currently use accelerometer or magnetometer correction.**
-
-### Acceleration and velocity
-
-The state processor supports both normal-range and high-range accelerometers. It selects the high-G measurement when the high-range acceleration-vector magnitude reaches the current `100 m/s²` switching threshold, applies the corresponding bias, transforms the measurement, removes gravity according to the application's frame convention, and integrates acceleration over time.
-
-> [!IMPORTANT]
-> **Current limitation:** Integrated velocity is calculated, but the current HUD's displayed vertical velocity comes from the rolling altitude slope. The active attitude path is gyro-only and therefore does not provide long-term drift correction.
-
-<!-- TODO: If state estimation / Kalman filtering has since changed in the repository,
-     update this section rather than describing planned work as implemented.
--->
-
----
-
-## Automatic Flight-State Detection
-
-Flight stages are determined from recent sensor history and telemetry timestamps.
-
-<div align="center">
-
-**Calibrating → Pad → Boost → Coast → Apogee → Descent → Recovery**
-
-</div>
-
-| Transition | Current detection logic |
-| :--- | :--- |
-| **Calibrating → Pad** | Calibration history reaches the requested duration |
-| **Pad → Boost** | 0.5 s mean normal-acceleration magnitude > `50 m/s²` |
-| **Boost → Coast** | 0.3 s mean acceleration < `15 m/s²` after > 1 s in Boost |
-| **Coast → Apogee** | > 10 s in Coast and 0.5 s altitude slope < `10 m/s` |
-| **Apogee → Descent** | > 5 s in Apogee |
-| **Descent → Recovery** | > 240 s in Descent, low altitude slope, and low angular rate |
-
-State transitions are monotonic: the state layer rejects backward transitions and attempts to skip over a flight stage.
-
-> [!NOTE]
-> **TODO — Validation:** Add the flight data, simulations, or requirements used to choose and validate these thresholds. If these are preliminary heuristics, say so explicitly.
-
----
-
-## Video Pipeline
-
-The camera path is deliberately separated from telemetry processing.
-
-```mermaid
-flowchart LR
-    Source["RTSP Camera"] --> Decode["OpenCV Capture<br>& Decode"]
-    Decode -->|"worker thread"| Buffer["Latest Frame<br>mutex-protected"]
-    Buffer -->|"new frame"| Upload["BGR → RGB<br>Texture Upload"]
-    Upload -->|"main thread"| HUD["raylib HUD"]
-```
-
-Rather than building a queue of camera frames, the `FrameBuffer` stores only the **latest available frame**. If capture produces frames faster than the HUD consumes them, an older frame can be replaced. This favors displaying recent imagery over preserving every video frame.
-
-For RTSP sources, the worker currently:
-
-- Requests TCP transport
-- Uses a 3 s open timeout
-- Uses a 1 s read timeout
-- Retries unopened streams after 500 ms
-- Releases and reopens the decoder after sustained failed reads or more than 2 s without a good frame
-
-<!-- TODO: Add a short GIF of the live camera panel if you have footage that is
-     appropriate to publish.
--->
-
----
-
-## Data Logging & Recorded Flight Data
-
-The live target can record each decoded telemetry sample to CSV before timestamp filtering, preserving the sensor stream for later inspection.
-
-```csv
-t_us,ax,ay,az,gx,gy,gz,mx,my,mz,imuTempC,baroTempC,pressPa,altM,hgx,hgy,hgz
-```
-
-The repository also contains tooling and data for working with recorded flights, including:
-
-- Sensor CSV recordings
-- Raw MAVLink binary captures
-- Primary and secondary flight-computer exports
-- GPS CSV/KML data
-- OpenRocket simulation data
-- Conversion scripts for producing test fixtures
-- Video/telemetry synchronization configuration
-
-### Replay status
-
-> [!WARNING]
-> **Replay is currently incomplete.** The existing timed CSV source emits CSV text while the active state-ingestion path expects MAVLink bytes. As a result, the current `replay` and `raven_test` paths do not yet drive the HUD through the active parser.
-
-This limitation is kept explicit here so the README distinguishes implemented capabilities from work in progress.
-
----
-
-## Real-World Deployment
-
-<!--
-TODO: THIS SHOULD BECOME ONE OF THE MOST IMPORTANT SECTIONS OF THE README.
-
-Recommended structure:
+This is software **built for flight.** Much of its development focused on handling the realities of live telemetry: timestamp discontinuities, noisy sensor data, interrupted streams, and signal loss. IREC 2026 provided the first opportunity to test those decisions in a real flight environment—and exposed several failure modes we had not encountered on the ground.
 
 ### IREC 2026
 
-[PHOTO OF ROCKET / TEAM / LAUNCH]
+<img width="1280" alt="BYU High Power Rocketry at IREC 2026" src="https://github.com/user-attachments/assets/180be120-328f-429c-bd6c-3cd73bb634c2" />
 
-2–3 paragraphs:
-- What the system was built to do.
-- How long you had to build it / what you personally owned, if appropriate.
-- What hardware it communicated with.
-- What happened during the actual flight.
-- What worked and what failed.
-- What telemetry was recovered and how it mattered.
+The telemetry system was deployed at the 2026 International Rocket Engineering Competition aboard BYU High Power Rocketry's competition vehicle. It was responsible for receiving live sensor telemetry and video, recording incoming data, estimating vehicle state, and providing operators with a real-time ground-station display.
 
-Then add a compact metrics row, for example ONLY AFTER VERIFYING THE NUMBERS:
+Shortly after launch, the 5 GHz telemetry link was lost, leaving the ground station with only sparse data for the remainder of the flight. An SD-card reader issue discovered just hours before launch also prevented the custom flight computer from logging telemetry onboard. After recovering the rocket, we discovered that both redundant commercial flight computers had also failed to produce usable flight records. Without another source of data, we risked having no recorded apogee to submit to the competition judges.
 
-| Flight | Telemetry | Payload | Video |
-| --- | --- | --- | --- |
-| ~30,000 ft | 60 Hz | 17 fields | 1080p / 60 fps |
+The ground station, however, had logged every telemetry packet it successfully received. From that sparse recording, we recovered a peak recorded altitude of approximately **27,000 ft**, providing the team's only usable apogee data and contributing to a **4th-place finish in our competition category.**
 
-Do not add those values solely because they are suggested here; verify them against
-the deployed configuration / flight records first.
--->
+### Lessons from Flight
 
-<div align="center">
+**Ground-station logging proved its value as an independent data path.** Although the RF link performed poorly, every packet that reached the application was recorded. When the onboard logging systems failed, those ground-station records became the team's only usable source of apogee data.
 
-### [TODO: Add competition / flight deployment story]
+Some of the biggest failures were no onboard logging and no onboard state estimation. Because the state estimation logic was being performed **on the ground,** after any loss of connection, we could not reliably determine the state of the vehicle. This was an oversight that we are going to fix in the upcoming year.
 
-*This section is intentionally reserved for verified field-performance context.*
+Another downfall to the current system is **lack of testability.** There are a couple builds that _allow_ testing, but they are for inspecting visuals and running it against a CSV file of data from our test flight. These are good, but they have their limits with utility. Testing the robustness of the error handling system, for example, was difficult to do in a meaningful way. Testing the accuracy of the state estimation (past what you can do by just inspecting its behavior when simulating the test flight data) was also difficult to do, and we were unsure as to how well it would work during our _actual_ flight.
 
-</div>
+### What We're Changing
+
+This upcoming year, we want to win the Live Telemetry / Live Video award at IREC. This will obviously require addressing the problems previously described, i.e. on-vehicle logging and state estimation, higher testability, more diagnosable errors, etc., but it will also require making fundamental improvements to how data is shown to the user. We need to add features, make the visuals nicer, and test it frequently.
+
+Some of the proposed changes so far are:
+
+* GPS position + map
+* Kalman filtering for improved state estimation
+* Status indicators for all measurements
+* Putting the 3D attitude visualization into a real world model using Unreal Engine
+
+<img width="376" height="204" alt="Proposed Unreal Engine visualization concept" src="https://github.com/user-attachments/assets/0c487111-b80f-43b5-b606-cd383210a17e" />
 
 ---
 
-## Testing & Verification
+[Capabilities](#current-capabilities) · [Architecture](#system-architecture) · [Engineering Decisions](#engineering-decisions) · [Testing & Limitations](#testing--limitations) · [Build & Run](#build--run)
 
-The repository includes several diagnostic and test-oriented executables:
+## Current Capabilities
 
-| Target | Purpose |
+The implementation described below is the current ground-station system. The changes proposed above are future work; onboard estimation, Kalman filtering, GPS mapping, and the Unreal Engine visualization are not presented as completed capabilities.
+
+| Area | Implemented behavior |
 | :--- | :--- |
-| `static_test` | Renders the HUD without a telemetry source for visual inspection |
-| `sensor_out` | Reads serial MAVLink telemetry and prints decoded sample timestamps |
-| `raven_test` | Timed recorded-data test path; currently affected by the CSV/MAVLink mismatch |
-| `replay` | Recorded telemetry + video playback path; currently incomplete |
+| **Telemetry ingestion** | Nonblocking POSIX serial input; persistent MAVLink 2 parsing with CRC validation and timestamp recovery |
+| **State processing** | Startup sensor calibration, quaternion-based attitude integration, acceleration processing, and automatic flight-stage detection |
+| **Operator display** | 3D rocket attitude, flight stage, altitude history, instrumentation, and RTSP camera feed in a raylib HUD |
+| **Live video** | OpenCV capture on a worker thread, latest-frame handoff, and reconnect handling |
+| **Recording** | Decoded telemetry written to CSV before timestamp filtering |
 
-A separate GoogleTest project also exists under `tests/`, but its build configuration is currently incomplete and is not registered with CTest.
+Flight deployment demonstrated the value of ground logging. The sparse telemetry recovered at IREC does not establish the accuracy of every estimator or stage-detection rule.
 
-> [!NOTE]
-> **TODO — Verification story:** Add the strongest tests you actually use: recorded-flight regression tests, reference measurements, hardware-in-the-loop tests, parser fixtures, stage-transition tests, or other acceptance criteria. This section will become much stronger once the automated test path is repaired.
+## System Architecture
 
----
+Telemetry processing and rendering share the main application thread. Camera capture and decoding run separately so that waiting for a video frame does not directly block the telemetry loop.
 
-## Current Development
+```mermaid
+flowchart LR
+    Serial["POSIX serial"] --> Parser["Persistent MAVLink 2 parser<br/>CRC validation"]
+    Parser --> Log["CSV recording"]
+    Parser --> Time["Timestamp validation<br/>and recovery"]
+    Time --> History["Bounded sample history"]
+    Time --> Queue["Integration queue"]
+    History --> Calibration["Calibration and<br/>flight-stage detection"]
+    History --> Processing["State processing"]
+    Queue --> Processing
+    Calibration --> State["Rocket state"]
+    Processing --> State
+    State --> HUD["raylib HUD"]
 
-<!-- TODO: Replace this placeholder with CURRENT, VERIFIED work.
-     Keep planned features separate from completed features.
-
-Suggested categories if they are genuinely in progress:
-- State estimation / sensor fusion
-- GPS + map visualization
-- Link-health / packet-loss instrumentation
-- Recorded-flight replay
-- HIL/SIL integration
-- 6-DOF simulation integration
-- Configurable operator views
-- Automated regression testing
--->
-
-The current repository represents an evolving telemetry platform rather than a finished product.
-
-### [TODO: Add current development priorities]
-
-- [ ] [Current priority]
-- [ ] [Current priority]
-- [ ] [Current priority]
-- [ ] [Current priority]
-
----
-
-## Repository Structure
-
-```text
-.
-├── CMakeLists.txt
-├── include/
-│   ├── hud/                  # HUD state, layout, resources, and display config
-│   ├── telemetry/            # Sources, parsers, samples, buffering, serial config
-│   │   └── feed/             # Camera/frame buffering and replay configuration
-│   ├── state/                # Rocket state, calibration, coordinate transforms
-│   │   └── detection/        # Flight-stage detection interface
-│   ├── logging/              # Sensor and diagnostic logging
-│   └── util/
-│
-├── src/
-│   ├── hud/                  # Application loop and rendering
-│   ├── telemetry/            # Serial, MAVLink/CSV parsing, video workers
-│   ├── state/                # State processing and flight-stage detection
-│   └── logging/
-│
-├── tests/                    # Manual tools and GoogleTest project
-├── resources/                # GLB models, GLSL shaders, and HUD font
-└── data/                     # Telemetry captures and flight-analysis data
+    subgraph Worker["Video worker thread"]
+        Camera["RTSP camera"] --> Decode["OpenCV capture and decode"]
+    end
+    Decode --> Frame["Mutex-protected<br/>latest frame"]
+    Frame --> Texture["Main-thread texture upload"]
+    Texture --> HUD
 ```
 
----
+The main loop drains available serial bytes, decodes and records samples, validates their timestamps, updates history, runs flight-stage detection, processes queued samples, and draws the resulting state. Video frames cross the thread boundary through a shared frame buffer; raylib texture updates and drawing stay on the main thread.
+
+## Engineering Decisions
+
+### Preserve received data before interpreting it
+
+The CSV logger branches off immediately after decoding, before timestamp filtering. A sample that is unsuitable for state integration can still be available for post-flight inspection. This keeps the recording path independent of downstream timestamp acceptance, while still requiring a valid decoded telemetry frame.
+
+### Recover timing before resuming integration
+
+Serial reads do not necessarily align with MAVLink frame boundaries, so the parser retains partial frames between reads. It validates CRCs, rejects oversized payloads, and ignores unrelated message IDs.
+
+At the sample level, accepted timestamps must advance. When source time moves backward, the application waits for **five strictly increasing timestamps** before reseeding its history and processing queue. This avoids treating a clock discontinuity as ordinary integration time. It cannot reconstruct telemetry lost over the RF link.
+
+### Bound recent history
+
+Calibration, stage detection, altitude-slope estimates, and rolling angular-rate readouts share a `SampleRingBuffer` capped at **200 samples and three seconds**. This bounds the retained history used for those calculations; the effective time window also depends on the incoming sample rate.
+
+### Favor fresh video over a growing queue
+
+The video worker retains only the **latest decoded frame**. If a newer frame arrives before the HUD consumes the previous one, it can replace the older frame. This trades preservation of every video frame for recent operator imagery and prevents an accumulating queue between capture and display.
+
+### Keep estimation claims explicit
+
+Attitude uses bias-corrected gyroscope integration, with quaternion normalization after each processed sample. It currently has **no accelerometer or magnetometer correction**, so drift remains a limitation. The HUD's vertical-velocity readout uses a rolling altitude slope, even though the state processor also computes acceleration-integrated velocity.
+
+## Operator Display
+
+The HUD combines the rocket model and camera feed with instrumentation and flight history.
+
+| Readout | Source |
+| :--- | :--- |
+| **AGL / ASL altitude** | Received altitude minus calibrated ground altitude / received `altM` |
+| **Vertical velocity** | Rolling two-second altitude slope |
+| **G-force** | Magnitude from the selected normal-range or high-G accelerometer |
+| **Roll, pitch, and yaw rates** | Rolling gyroscope measurements |
+| **Flight stage** | Automatic detector using sensor history and elapsed time |
+| **Altitude history** | AGL altitude plotted against time since launch |
+| **3D attitude** | Gyroscope-integrated quaternion orientation |
+| **Camera** | RTSP frames decoded by OpenCV |
+
+## Testing & Limitations
+
+The repository provides manual inspection and diagnostic tools, but it does not yet provide a complete automated verification path. Visual inspection and deployment experience are useful evidence; they do not substitute for repeatable tests of estimator accuracy or failure handling.
+
+| Target / infrastructure | Purpose and current status |
+| :--- | :--- |
+| `static_test` | Renders the HUD without telemetry hardware for visual inspection |
+| `sensor_out` | Reads serial MAVLink telemetry and prints decoded sample timestamps |
+| `raven_test` | Working recorded-telemetry test, hard-coded to read CSV data from the FAR test flight |
+| `replay` | Intended to recreate a flight using synchronized video and CSV telemetry, configured through `include/telemetry/feed/sync.json`. Currently incomplete: CSV text cannot feed the active binary MAVLink parser, leaving the HUD in calibration. Configured file paths are also empty. |
+| GoogleTest project in `tests/` | Build configuration is incomplete and is not registered with CTest |
+
+The repository includes sensor CSV recordings, raw MAVLink captures, commercial flight-computer exports, GPS CSV/KML data, OpenRocket simulation data, conversion scripts, and video/telemetry synchronization configuration. These support investigation and future test fixtures; their presence does not imply a working regression suite.
+
+**Current operating limits:**
+
+- Gyro-only attitude and acceleration-integrated velocity lack external drift correction.
+- Flight-stage thresholds are heuristic; their validation basis is not documented in the source README.
+- Packet-drop statistics are not exposed in the HUD.
+- Operational settings are largely configured at compile time.
+- Serial I/O is POSIX-based, with a macOS-specific configured device path and no Windows serial backend.
+- Lost RF packets remain unavailable to the ground station; onboard logging and estimation are part of the proposed response described above.
 
 ## Build & Run
 
-### Requirements
+**Requirements:** CMake 3.20+, a C++20 compiler and standard library supporting `std::format` and chrono formatting, raylib, and OpenCV.
 
-- **CMake 3.20+**
-- **C++20** compiler / standard library with `std::format` and chrono-formatting support
-- **raylib**
-- **OpenCV**
+Before building for live hardware, set the serial device, baud rate, and RTSP URL in `include/telemetry/telemetry_config.hpp`.
 
-The current serial implementation uses POSIX `open`, `read`, and `termios`. The configured serial-device path is macOS-specific; there is currently no Windows serial backend.
-
-### Build the live application
+From the repository root:
 
 ```bash
 cmake -S . -B build
 cmake --build build --target BYU_Telemetry_HUD --parallel
-```
-
-Run the executable **from the repository root**, because the current model, shader, and font paths are relative to the process working directory.
-
-```bash
 mkdir -p data/logged_data
 ./build/BYU_Telemetry_HUD
 ```
 
-### Preview without flight hardware
+Run from the repository root because model, shader, and font paths are relative to the working directory.
 
-The static HUD target can be used to inspect the interface without connecting a telemetry device:
+To inspect the HUD without flight hardware, use the static display target after configuring the build:
 
 ```bash
 cmake --build build --target static_test --parallel
 ./build/static_test
 ```
 
-### Hardware configuration
+The static target previews the interface; it does not simulate a flight or validate telemetry processing.
 
-Before running against live hardware, configure:
+## Technical Reference
 
-```text
-include/telemetry/telemetry_config.hpp
+<details>
+<summary><strong>Telemetry format and recording schema</strong></summary>
+
+The active parser accepts a project-specific MAVLink 2 message:
+
+| Property | Value |
+| :--- | :--- |
+| Message ID | `300` |
+| CRC extra | `95` |
+| Payload | 72 bytes: one little-endian `uint64_t` timestamp and 16 little-endian 32-bit floats |
+| Signed frames | Signature trailer length is accounted for; authentication is not performed |
+
+The decoded `SensorData` fields map to the CSV recording schema:
+
+```csv
+t_us,ax,ay,az,gx,gy,gz,mx,my,mz,imuTempC,baroTempC,pressPa,altM,hgx,hgy,hgz
 ```
 
-The current configuration contains the serial device, baud rate, and RTSP URL.
+These contain the timestamp, normal accelerometer, gyroscope, magnetometer, IMU temperature, barometer temperature and pressure, altitude, and high-G accelerometer measurements.
 
-> [!TIP]
-> For a recruiter-facing repository, keep this section intentionally short. Detailed dependency, replay, and troubleshooting instructions are better placed in `docs/` as the project matures.
+</details>
+
+<details>
+<summary><strong>Calibration, coordinate frames, and motion processing</strong></summary>
+
+Startup calibration uses a stationary telemetry window to average both accelerometers and the gyroscope. Measurements are converted from sensor coordinates to the rocket body frame:
+
+```text
+sensor (x, y, z) → body (z, -y, x)
+```
+
+The expected gravity contribution is removed from the body-Z accelerometer means. The gyroscope mean becomes the gyro bias, and mean received altitude becomes the ground-altitude reference. Calibration then advances the state to Pad.
+
+For attitude updates, gyroscope measurements are mapped into body coordinates and bias-corrected. Angular rate multiplied by the sample interval produces an axis-angle quaternion increment, which is converted to rendering coordinates, multiplied into the current orientation, and normalized.
+
+The acceleration processor selects the high-G measurement when its vector magnitude reaches the current **100 m/s²** switching threshold. It applies the matching bias, transforms the measurement, removes gravity according to the application's frame convention, and integrates acceleration over time. This integrated velocity is separate from the altitude-slope velocity shown in the HUD.
+
+</details>
+
+<details>
+<summary><strong>Flight-stage detection rules</strong></summary>
+
+**Calibrating → Pad → Boost → Coast → Apogee → Descent → Recovery**
+
+| Transition | Current logic |
+| :--- | :--- |
+| Calibrating → Pad | Calibration history reaches the requested duration |
+| Pad → Boost | 0.5 s mean normal-acceleration magnitude > `50 m/s²` |
+| Boost → Coast | 0.3 s mean acceleration < `15 m/s²`, after > 1 s in Boost |
+| Coast → Apogee | > 10 s in Coast and 0.5 s altitude slope < `10 m/s` |
+| Apogee → Descent | > 5 s in Apogee |
+| Descent → Recovery | > 240 s in Descent, low altitude slope, and low angular rate |
+
+The state layer rejects backward transitions and attempts to skip stages. These are the current detection rules, not a claim of validated performance across flight profiles.
+
+</details>
+
+<details>
+<summary><strong>Video recovery behavior</strong></summary>
+
+For RTSP sources, the OpenCV worker requests TCP transport, uses a three-second open timeout and a one-second read timeout, and retries unopened streams after 500 ms. It releases and reopens the decoder after sustained failed reads or more than two seconds without a good frame.
+
+The latest frame is handed off under a mutex. BGR-to-RGB conversion and texture upload occur on the main thread before the HUD draws the camera panel.
+
+</details>
+
+<details>
+<summary><strong>Repository guide</strong></summary>
+
+```text
+.
+├── CMakeLists.txt
+├── include/
+│   ├── hud/                 # HUD state, layout, resources, display configuration
+│   ├── telemetry/           # Sources, parsing, samples, buffering, serial config
+│   │   └── feed/            # Camera buffering and replay configuration
+│   ├── state/               # Rocket state, calibration, coordinate transforms
+│   │   └── detection/       # Flight-stage detection interface
+│   ├── logging/             # Sensor and diagnostic logging
+│   └── util/
+├── src/
+│   ├── hud/                 # Application loop and rendering
+│   ├── telemetry/           # Serial, MAVLink/CSV parsing, video workers
+│   ├── state/               # State processing and flight-stage detection
+│   └── logging/
+├── tests/                   # Manual tools and incomplete GoogleTest project
+├── resources/               # GLB models, GLSL shaders, HUD font
+└── data/                    # Telemetry captures and flight-analysis data
+```
+
+</details>
 
 ---
-
-## Known Limitations
-
-This project is actively evolving. Important limitations in the current checkout include:
-
-- Recorded CSV replay does not yet feed the active MAVLink-only state path.
-- Attitude estimation currently integrates gyroscope data without accelerometer or magnetometer correction.
-- Integrated velocity has no external correction.
-- Packet-drop statistics are not currently surfaced in the HUD.
-- Operational settings are largely compile-time configuration.
-- The serial backend is POSIX/macOS-oriented.
-- The automated GoogleTest build requires repair before it provides a complete test suite.
-
-Keeping these limitations explicit makes it easier to distinguish the current implementation from planned improvements.
-
----
-
-## Tech Stack
-
-<div align="center">
-
-| Core | Visualization | I/O & Media | Build / Test |
-| :---: | :---: | :---: | :---: |
-| C++20 | raylib | MAVLink 2 | CMake |
-| Quaternions | GLSL | POSIX Serial | GoogleTest* |
-| Sensor processing | GLB models | OpenCV / RTSP | Recorded telemetry |
-
-<sub>*GoogleTest infrastructure exists but the current standalone test build is incomplete.</sub>
-
-</div>
-
----
-
-## Acknowledgments
 
 Developed for **BYU High Power Rocketry**.
 
-<!-- TODO:
-- Add collaborators / subteam members if appropriate.
-- Add competition attribution.
-- Add credits for any externally sourced model, font, shader, or other asset
-  where the license requires attribution.
--->
-
----
-
-<div align="center">
-
-**[TODO: Add a final launch/HUD GIF or team/rocket image]**
-
-*Built to turn raw flight data into information an operator can use in real time.*
-
-</div>
